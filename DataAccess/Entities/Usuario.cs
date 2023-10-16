@@ -13,17 +13,9 @@ public partial class Usuario
 
     public string Email { get; set; } = null!;
 
-    public string Password { get; set; } = null!;
-
-    public int? Telefono { get; set; }
-
     public int? Dni { get; set; }
 
-    public int IdRol { get; set; }
+    public string? Telefono { get; set; }
 
     public virtual ICollection<Domicilio> Domicilio { get; set; } = new List<Domicilio>();
-
-    public virtual Rol IdRolNavigation { get; set; } = null!;
-
-    public virtual ICollection<Pedido> Pedido { get; set; } = new List<Pedido>();
 }

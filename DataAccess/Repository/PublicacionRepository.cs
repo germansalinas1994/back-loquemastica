@@ -7,7 +7,7 @@ namespace DataAccess.Repository
 {
     public class PublicacionRepository : GenericRepository<Publicacion>, IPublicacionRepository
     {
-        public PublicacionRepository(EcommercedbContext context) : base(context)
+        public PublicacionRepository(DbveterinariaContext context) : base(context)
         {
         }
 

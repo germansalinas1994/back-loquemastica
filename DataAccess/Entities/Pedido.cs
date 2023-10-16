@@ -7,27 +7,27 @@ public partial class Pedido
 {
     public int IdPedido { get; set; }
 
-    public string? Token { get; set; }
+    public int? IdUsuario { get; set; }
 
-    public int IdPublicacion { get; set; }
+    public int? IdPago { get; set; }
 
-    public int Cantidad { get; set; }
+    public int? IdTipoPedido { get; set; }
 
-    public int IdUsuario { get; set; }
+    public int? IdPublicacion { get; set; }
 
-    public int IdTipoEntrega { get; set; }
+    public int? NroPedido { get; set; }
 
-    public int IdEstadoPedido { get; set; }
+    public DateTime? FechaAlta { get; set; }
 
-    public int? IdSucursal { get; set; }
+    public DateTime? FechaModificacion { get; set; }
 
-    public virtual Envio? Envio { get; set; }
+    public DateTime? FechaBaja { get; set; }
 
-    public virtual Estadopedido IdEstadoPedidoNavigation { get; set; } = null!;
+    public int? IdEstadoPedido { get; set; }
 
-    public virtual Publicacion IdPublicacionNavigation { get; set; } = null!;
+    public sbyte? Envio { get; set; }
 
-    public virtual Sucursal? IdSucursalNavigation { get; set; }
+    public string? Pedidocol { get; set; }
 
-    public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
+    public virtual ICollection<Envio> EnvioNavigation { get; set; } = new List<Envio>();
 }

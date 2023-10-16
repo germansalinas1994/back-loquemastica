@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace DataAccess.Entities;
 
-public partial class Estadopedido
+public partial class Tipopedido
 {
-    public int IdEstadoPedido { get; set; }
+    public int IdTipoPedido { get; set; }
 
     public string? Descipcion { get; set; }
 }

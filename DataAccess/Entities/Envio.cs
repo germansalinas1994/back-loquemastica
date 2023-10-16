@@ -7,13 +7,15 @@ public partial class Envio
 {
     public int IdEnvio { get; set; }
 
-    public int IdPedido { get; set; }
+    public int? IdEstadoEnvio { get; set; }
 
-    public string CodigoSeguimiento { get; set; } = null!;
+    public float? Precio { get; set; }
 
-    public int IdDomicilio { get; set; }
+    public DateTime? FechaEnvio { get; set; }
 
-    public virtual Domicilio IdDomicilioNavigation { get; set; } = null!;
+    public int? IdPedido { get; set; }
 
-    public virtual Pedido IdPedidoNavigation { get; set; } = null!;
+    public virtual Estadoenvio? IdEstadoEnvioNavigation { get; set; }
+
+    public virtual Pedido? IdPedidoNavigation { get; set; }
 }

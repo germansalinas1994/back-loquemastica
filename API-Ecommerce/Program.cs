@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen();
 
 // ADD Entity framework con mysql
 
-builder.Services.AddDbContext<EcommercedbContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("dbConnection")));
+builder.Services.AddDbContext<DbveterinariaContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("dbConnection")));
 
 //agrego la inyeccion de dependencia de los repositorios y el UnitOfWork
 
@@ -52,7 +52,7 @@ using(var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<EcommercedbContext>();
+        var context = services.GetRequiredService<DbveterinariaContext>();
         context.Database.EnsureCreated();
     }
     catch (Exception ex)

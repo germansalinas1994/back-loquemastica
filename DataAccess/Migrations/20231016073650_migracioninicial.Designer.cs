@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
-    [DbContext(typeof(EcommercedbContext))]
-    [Migration("20231001061546_migracioninicial")]
+    [DbContext(typeof(DbveterinariaContext))]
+    [Migration("20231016073650_migracioninicial")]
     partial class migracioninicial
     {
         /// <inheritdoc />
@@ -30,10 +30,25 @@ namespace DataAccess.Migrations
                         .HasColumnName("idCategoria");
 
                     b.Property<string>("Descripcion")
-                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("descripcion");
+
+                    b.Property<DateTime?>("FechaDesde")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaDesde");
+
+                    b.Property<DateTime?>("FechaHasta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaHasta");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<string>("Nombre")
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
-                        .HasColumnName("descripcion");
+                        .HasColumnName("nombre");
 
                     b.HasKey("IdCategoria")
                         .HasName("PRIMARY");
@@ -48,15 +63,28 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idDomicilio");
 
-                    b.Property<int>("Altura")
+                    b.Property<string>("Aclaracion")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("aclaracion");
+
+                    b.Property<int?>("Altura")
                         .HasColumnType("int")
                         .HasColumnName("altura");
 
                     b.Property<string>("Calle")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
                         .HasColumnName("calle");
+
+                    b.Property<string>("Departamento")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("departamento");
+
+                    b.Property<string>("Domiciliocol")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)");
 
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int")
@@ -65,26 +93,9 @@ namespace DataAccess.Migrations
                     b.HasKey("IdDomicilio")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdUsuario" }, "id_usuario_FK_idx");
+                    b.HasIndex(new[] { "IdUsuario" }, "id_Usuario_FKD_idx");
 
                     b.ToTable("domicilio", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.EfmigrationsHistory", b =>
-                {
-                    b.Property<string>("MigrationId")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<string>("ProductVersion")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.HasKey("MigrationId")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("__EFMigrationsHistory", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Envio", b =>
@@ -94,31 +105,48 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idEnvio");
 
-                    b.Property<string>("CodigoSeguimiento")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .HasColumnName("codigo_seguimiento");
+                    b.Property<DateTime?>("FechaEnvio")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaEnvio");
 
-                    b.Property<int>("IdDomicilio")
+                    b.Property<int?>("IdEstadoEnvio")
                         .HasColumnType("int")
-                        .HasColumnName("id_domicilio");
+                        .HasColumnName("id_estadoEnvio");
 
-                    b.Property<int>("IdPedido")
+                    b.Property<int?>("IdPedido")
                         .HasColumnType("int")
                         .HasColumnName("id_pedido");
+
+                    b.Property<float?>("Precio")
+                        .HasColumnType("float")
+                        .HasColumnName("precio");
 
                     b.HasKey("IdEnvio")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdDomicilio" }, "id_domicilio_idx");
+                    b.HasIndex(new[] { "IdEstadoEnvio" }, "id_estadoEnvio_FKE_idx");
 
-                    b.HasIndex(new[] { "IdPedido" }, "id_pedido_FK_idx");
-
-                    b.HasIndex(new[] { "IdPedido" }, "id_pedido_UNIQUE")
-                        .IsUnique();
+                    b.HasIndex(new[] { "IdPedido" }, "id_pedido_FKE_idx");
 
                     b.ToTable("envio", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Estadoenvio", b =>
+                {
+                    b.Property<int>("IdEstadoEnvio")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoEnvio");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("descripcion");
+
+                    b.HasKey("IdEstadoEnvio")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("estadoenvio", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Estadopedido", b =>
@@ -128,11 +156,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idEstadoPedido");
 
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
+                    b.Property<string>("Descipcion")
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
-                        .HasColumnName("descripcion");
+                        .HasColumnName("descipcion");
 
                     b.HasKey("IdEstadoPedido")
                         .HasName("PRIMARY");
@@ -140,22 +167,25 @@ namespace DataAccess.Migrations
                     b.ToTable("estadopedido", (string)null);
                 });
 
-            modelBuilder.Entity("DataAccess.Entities.Estadopublicacion", b =>
+            modelBuilder.Entity("DataAccess.Entities.Pago", b =>
                 {
-                    b.Property<int>("IdEstadoPublicacion")
+                    b.Property<int>("IdPago")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("idEstadoPublicacion");
+                        .HasColumnName("idPago");
 
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .HasColumnName("descripcion");
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaAlta");
 
-                    b.HasKey("IdEstadoPublicacion")
+                    b.Property<int>("NroTransaccion")
+                        .HasColumnType("int")
+                        .HasColumnName("nroTransaccion");
+
+                    b.HasKey("IdPago")
                         .HasName("PRIMARY");
 
-                    b.ToTable("estadopublicacion", (string)null);
+                    b.ToTable("pago", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
@@ -165,47 +195,62 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idPedido");
 
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int")
-                        .HasColumnName("cantidad");
+                    b.Property<sbyte?>("Envio")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("envio");
 
-                    b.Property<int>("IdEstadoPedido")
-                        .HasColumnType("int")
-                        .HasColumnName("id_estado_pedido");
+                    b.Property<DateTime?>("FechaAlta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaAlta");
 
-                    b.Property<int>("IdPublicacion")
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaBaja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<int?>("IdEstadoPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("id_estadoPedido");
+
+                    b.Property<int?>("IdPago")
+                        .HasColumnType("int")
+                        .HasColumnName("id_pago");
+
+                    b.Property<int?>("IdPublicacion")
                         .HasColumnType("int")
                         .HasColumnName("id_publicacion");
 
-                    b.Property<int?>("IdSucursal")
+                    b.Property<int?>("IdTipoPedido")
                         .HasColumnType("int")
-                        .HasColumnName("id_sucursal");
+                        .HasColumnName("id_tipoPedido");
 
-                    b.Property<int>("IdTipoEntrega")
-                        .HasColumnType("int")
-                        .HasColumnName("id_tipo_entrega");
-
-                    b.Property<int>("IdUsuario")
+                    b.Property<int?>("IdUsuario")
                         .HasColumnType("int")
                         .HasColumnName("id_usuario");
 
-                    b.Property<string>("Token")
+                    b.Property<int?>("NroPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("nroPedido");
+
+                    b.Property<string>("Pedidocol")
                         .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .HasColumnName("token");
+                        .HasColumnType("varchar(45)");
 
                     b.HasKey("IdPedido")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdEstadoPedido" }, "id_estado_pedido_FK_idx");
+                    b.HasIndex(new[] { "IdEstadoPedido" }, "id_estadoPedido_idx");
 
-                    b.HasIndex(new[] { "IdPublicacion" }, "id_publicacion_FK_idx");
+                    b.HasIndex(new[] { "IdPago" }, "id_pago_FKP_idx");
 
-                    b.HasIndex(new[] { "IdSucursal" }, "id_sucursal_FK_idx");
+                    b.HasIndex(new[] { "IdPublicacion" }, "id_publicacion_FKP_idx");
 
-                    b.HasIndex(new[] { "IdTipoEntrega" }, "id_tipo_entrega_FK_idx");
+                    b.HasIndex(new[] { "IdTipoPedido" }, "id_tipoPedido_FKP_idx");
 
-                    b.HasIndex(new[] { "IdUsuario" }, "id_usuario_FK_idx1");
+                    b.HasIndex(new[] { "IdUsuario" }, "id_usuario_FKP_idx");
 
                     b.ToTable("pedido", (string)null);
                 });
@@ -218,18 +263,37 @@ namespace DataAccess.Migrations
                         .HasColumnName("idProducto");
 
                     b.Property<string>("Descripcion")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasColumnType("longtext")
                         .HasColumnName("descripcion");
 
-                    b.Property<int>("IdCategoria")
+                    b.Property<DateTime?>("FechaAlta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaAlta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaBaja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<int?>("IdCategoria")
                         .HasColumnType("int")
                         .HasColumnName("id_categoria");
+
+                    b.Property<string>("Nombre")
+                        .HasColumnType("longtext")
+                        .HasColumnName("nombre");
+
+                    b.Property<string>("UrlImagen")
+                        .HasColumnType("longtext")
+                        .HasColumnName("urlImagen");
 
                     b.HasKey("IdProducto")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdCategoria" }, "id_categoria_FK_idx");
+                    b.HasIndex(new[] { "IdCategoria" }, "id_Categoria_FKP_idx");
 
                     b.ToTable("producto", (string)null);
                 });
@@ -241,57 +305,41 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idPublicacion");
 
-                    b.Property<DateTime>("FechaDesde")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fecha_desde");
+                    b.Property<DateTime?>("FechaDesde")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaDesde");
 
                     b.Property<DateTime?>("FechaHasta")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fecha_hasta");
+                        .HasColumnType("date")
+                        .HasColumnName("fechaHasta");
 
-                    b.Property<int?>("IdEstado")
-                        .HasColumnType("int")
-                        .HasColumnName("id_estado");
-
-                    b.Property<int>("IdProducto")
+                    b.Property<int?>("IdProducto")
                         .HasColumnType("int")
                         .HasColumnName("id_producto");
+
+                    b.Property<int?>("IdSucursal")
+                        .HasColumnType("int")
+                        .HasColumnName("id_sucursal");
 
                     b.Property<float?>("Precio")
                         .HasColumnType("float")
                         .HasColumnName("precio");
 
-                    b.Property<int>("Stock")
+                    b.Property<int?>("Stock")
                         .HasColumnType("int")
                         .HasColumnName("stock");
 
                     b.HasKey("IdPublicacion")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdEstado" }, "id_estadopublicacion_fk1_idx");
+                    b.HasIndex(new[] { "IdProducto" }, "id_producto_FKP_idx");
 
-                    b.HasIndex(new[] { "IdProducto" }, "id_producto_fkp_idx");
+                    b.HasIndex(new[] { "IdSucursal" }, "id_sucursal_FKP_idx");
 
-                    b.ToTable("publicacion", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Rol", b =>
-                {
-                    b.Property<int>("IdRol")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("idRol");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .HasColumnName("descripcion");
-
-                    b.HasKey("IdRol")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("rol", (string)null);
+                    b.ToTable("publicacion", null, t =>
+                        {
+                            t.HasComment("						");
+                        });
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Sucursal", b =>
@@ -301,10 +349,38 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idSucursal");
 
+                    b.Property<string>("Direccion")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("direccion");
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("nombre");
+
                     b.HasKey("IdSucursal")
                         .HasName("PRIMARY");
 
                     b.ToTable("sucursal", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Tipopedido", b =>
+                {
+                    b.Property<int>("IdTipoPedido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idTipoPedido");
+
+                    b.Property<string>("Descipcion")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("descipcion");
+
+                    b.HasKey("IdTipoPedido")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("tipopedido", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Usuario", b =>
@@ -325,39 +401,25 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("email");
-
-                    b.Property<int>("IdRol")
-                        .HasColumnType("int")
-                        .HasColumnName("id_rol");
 
                     b.Property<string>("Nombre")
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("nombre");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("Telefono")
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
-                        .HasColumnName("password");
-
-                    b.Property<int?>("Telefono")
-                        .HasColumnType("int")
                         .HasColumnName("telefono");
 
                     b.HasKey("IdUsuario")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "Dni" }, "dni_UNIQUE")
-                        .IsUnique();
-
                     b.HasIndex(new[] { "Email" }, "email_UNIQUE")
                         .IsUnique();
-
-                    b.HasIndex(new[] { "IdRol" }, "id_rol_FK_idx");
 
                     b.ToTable("usuario", (string)null);
                 });
@@ -368,62 +430,26 @@ namespace DataAccess.Migrations
                         .WithMany("Domicilio")
                         .HasForeignKey("IdUsuario")
                         .IsRequired()
-                        .HasConstraintName("id_usuario_FK2");
+                        .HasConstraintName("id_Usuario_FKD");
 
                     b.Navigation("IdUsuarioNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Envio", b =>
                 {
-                    b.HasOne("DataAccess.Entities.Domicilio", "IdDomicilioNavigation")
+                    b.HasOne("DataAccess.Entities.Estadoenvio", "IdEstadoEnvioNavigation")
                         .WithMany("Envio")
-                        .HasForeignKey("IdDomicilio")
-                        .IsRequired()
-                        .HasConstraintName("id_domicilio");
+                        .HasForeignKey("IdEstadoEnvio")
+                        .HasConstraintName("id_estadoEnvio_FKE");
 
                     b.HasOne("DataAccess.Entities.Pedido", "IdPedidoNavigation")
-                        .WithOne("Envio")
-                        .HasForeignKey("DataAccess.Entities.Envio", "IdPedido")
-                        .IsRequired()
-                        .HasConstraintName("id_pedido_FK");
+                        .WithMany("EnvioNavigation")
+                        .HasForeignKey("IdPedido")
+                        .HasConstraintName("id_pedido_FKE");
 
-                    b.Navigation("IdDomicilioNavigation");
+                    b.Navigation("IdEstadoEnvioNavigation");
 
                     b.Navigation("IdPedidoNavigation");
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
-                {
-                    b.HasOne("DataAccess.Entities.Estadopedido", "IdEstadoPedidoNavigation")
-                        .WithMany("Pedido")
-                        .HasForeignKey("IdEstadoPedido")
-                        .IsRequired()
-                        .HasConstraintName("id_estado_pedido_FK");
-
-                    b.HasOne("DataAccess.Entities.Publicacion", "IdPublicacionNavigation")
-                        .WithMany("Pedido")
-                        .HasForeignKey("IdPublicacion")
-                        .IsRequired()
-                        .HasConstraintName("id_publicacion_FK");
-
-                    b.HasOne("DataAccess.Entities.Sucursal", "IdSucursalNavigation")
-                        .WithMany("Pedido")
-                        .HasForeignKey("IdSucursal")
-                        .HasConstraintName("id_sucursal_FK");
-
-                    b.HasOne("DataAccess.Entities.Usuario", "IdUsuarioNavigation")
-                        .WithMany("Pedido")
-                        .HasForeignKey("IdUsuario")
-                        .IsRequired()
-                        .HasConstraintName("id_usuario_FK");
-
-                    b.Navigation("IdEstadoPedidoNavigation");
-
-                    b.Navigation("IdPublicacionNavigation");
-
-                    b.Navigation("IdSucursalNavigation");
-
-                    b.Navigation("IdUsuarioNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>
@@ -431,39 +457,26 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Entities.Categoria", "IdCategoriaNavigation")
                         .WithMany("Producto")
                         .HasForeignKey("IdCategoria")
-                        .IsRequired()
-                        .HasConstraintName("id_categoria_FK");
+                        .HasConstraintName("id_Categoria_FKP");
 
                     b.Navigation("IdCategoriaNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Publicacion", b =>
                 {
-                    b.HasOne("DataAccess.Entities.Estadopublicacion", "IdEstadoNavigation")
-                        .WithMany("Publicacion")
-                        .HasForeignKey("IdEstado")
-                        .HasConstraintName("id_estadopublicacion_fk1");
-
                     b.HasOne("DataAccess.Entities.Producto", "IdProductoNavigation")
                         .WithMany("Publicacion")
                         .HasForeignKey("IdProducto")
-                        .IsRequired()
-                        .HasConstraintName("id_producto_fkp");
+                        .HasConstraintName("id_producto_FKP");
 
-                    b.Navigation("IdEstadoNavigation");
+                    b.HasOne("DataAccess.Entities.Sucursal", "IdSucursalNavigation")
+                        .WithMany("Publicacion")
+                        .HasForeignKey("IdSucursal")
+                        .HasConstraintName("id_sucursal_FKP");
 
                     b.Navigation("IdProductoNavigation");
-                });
 
-            modelBuilder.Entity("DataAccess.Entities.Usuario", b =>
-                {
-                    b.HasOne("DataAccess.Entities.Rol", "IdRolNavigation")
-                        .WithMany("Usuario")
-                        .HasForeignKey("IdRol")
-                        .IsRequired()
-                        .HasConstraintName("id_rol_FK");
-
-                    b.Navigation("IdRolNavigation");
+                    b.Navigation("IdSucursalNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Categoria", b =>
@@ -471,24 +484,14 @@ namespace DataAccess.Migrations
                     b.Navigation("Producto");
                 });
 
-            modelBuilder.Entity("DataAccess.Entities.Domicilio", b =>
+            modelBuilder.Entity("DataAccess.Entities.Estadoenvio", b =>
                 {
                     b.Navigation("Envio");
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Estadopedido", b =>
-                {
-                    b.Navigation("Pedido");
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Estadopublicacion", b =>
-                {
-                    b.Navigation("Publicacion");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
                 {
-                    b.Navigation("Envio");
+                    b.Navigation("EnvioNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>
@@ -496,26 +499,14 @@ namespace DataAccess.Migrations
                     b.Navigation("Publicacion");
                 });
 
-            modelBuilder.Entity("DataAccess.Entities.Publicacion", b =>
-                {
-                    b.Navigation("Pedido");
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Rol", b =>
-                {
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("DataAccess.Entities.Sucursal", b =>
                 {
-                    b.Navigation("Pedido");
+                    b.Navigation("Publicacion");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Usuario", b =>
                 {
                     b.Navigation("Domicilio");
-
-                    b.Navigation("Pedido");
                 });
 #pragma warning restore 612, 618
         }

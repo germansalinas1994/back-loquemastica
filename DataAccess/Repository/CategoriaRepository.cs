@@ -11,7 +11,7 @@ namespace DataAccess.Repository
 
 
         //que hace esta linea
-        public CategoriaRepository(EcommercedbContext _context) : base(_context)
+        public CategoriaRepository(DbveterinariaContext _context) : base(_context)
         {
         }
 
