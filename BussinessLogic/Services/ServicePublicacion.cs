@@ -7,6 +7,8 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
 
+
+
 namespace BussinessLogic.Services
 {
     public class ServicePublicacion
@@ -43,7 +45,8 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task<List<PublicacionDTO>> GetPublicacionesCarrito(List<SearchPublicacionCarritoDTO> publicacionCarrito){
+        public async Task<List<PublicacionDTO>> GetPublicacionesCarrito(List<SearchPublicacionCarritoDTO> publicacionCarrito)
+        {
             List<int> ids = publicacionCarrito.Select(p => p.Id).ToList();
             List<PublicacionDTO> publicaciones = (await _unitOfWork.PublicacionRepository.GetPublicacionesCarrito(ids)).Adapt<List<PublicacionDTO>>();
 
@@ -73,8 +76,10 @@ namespace BussinessLogic.Services
         //     }
 
         //     return publicacionesDTO;
-        // }
+        //}
 
 
+    
+   
     }
 }

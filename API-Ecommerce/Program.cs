@@ -30,6 +30,7 @@ builder.Services.AddDbContext<DbveterinariaContext>(options => options.UseMySQL(
 builder.Services.AddScoped<ServiceCategoria>();
 builder.Services.AddScoped<ServiceProducto>();
 builder.Services.AddScoped<ServicePublicacion>();
+builder.Services.AddScoped<ServiceMercadoPago>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

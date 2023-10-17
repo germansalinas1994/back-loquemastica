@@ -33,6 +33,7 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
+
                 IList<PublicacionDTO> publicaciones = await _service.GetAllPublicaciones();
                 ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
                 return response;
@@ -82,8 +83,8 @@ namespace API_Ecommerce.Controllers
 
         [HttpPost]
         [Route("/publicacionesCarrito")]
-        public async Task<ApiResponse>GetPublicacionesCarrito([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
-        {   
+        public async Task<ApiResponse> GetPublicacionesCarrito([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
+        {
             try
             {
                 if (publicacionCarrito == null || publicacionCarrito.Count == 0)
@@ -108,7 +109,6 @@ namespace API_Ecommerce.Controllers
         }
 
 
-        
 
 
 
