@@ -88,7 +88,7 @@ namespace API_Ecommerce.Controllers
             {
                 if (publicacionCarrito == null || publicacionCarrito.Count == 0)
                 {
-                    throw new ApiException("Carrito vacío");
+                    return new ApiResponse("Carrito vacío");
                 }
                 List<PublicacionDTO> publicaciones = (await _service.GetPublicacionesCarrito(publicacionCarrito)).ToList();
 
