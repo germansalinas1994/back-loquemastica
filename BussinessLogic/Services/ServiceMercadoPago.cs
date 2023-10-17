@@ -57,7 +57,7 @@ namespace BussinessLogic.Services
             var client = new PreferenceClient();
             Preference preference = await client.CreateAsync(request);
 
-            return "dsadasdas";
+            return preference.Id;
 
         }
 
