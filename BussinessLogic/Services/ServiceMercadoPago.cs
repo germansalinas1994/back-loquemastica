@@ -13,17 +13,21 @@ using BussinessLogic.DTO.Search;
 using MercadoPago.Config;
 using MercadoPago.Client.Preference;
 using MercadoPago.Resource.Preference;
+using Microsoft.Extensions.Options;
 // Agrega credenciales
 
 namespace BussinessLogic.Services
 {
     public class ServiceMercadoPago
     {
-        //Instancio el UnitOfWork que vamos a usar
 
-        //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceMercadoPago()
+        //instancio el settings para poder usar las credenciales de mercado pago
+        private readonly MercadoPagoDevSettings _mercadoPagoSettings;
+
+        //inyecto el settings por el constructor, para poder usar las credenciales de mercado pago
+        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions)
         {
+            _mercadoPagoSettings = mercadoPagoSettingsOptions.Value;
         }
 
 
@@ -31,14 +35,26 @@ namespace BussinessLogic.Services
 
         public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones)
         {
-            MercadoPagoConfig.AccessToken = "TEST-777128697650019-101712-6864c880dae0b60469ef6bfe3004e124-178444398";
+
+
+            //las credenciales que puse son de prueba, hay que cambiarlas por las de produccion, estas las cree en la cuenta del vendedor de prueba
+            MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
             // Crea el objeto de request de la preference
 
 
-         var request = new PreferenceRequest
-     {
-        Items = new List<PreferenceItemRequest>()
-    };
+            var request = new PreferenceRequest
+            {
+                Items = new List<PreferenceItemRequest>()
+            };
+
+            request.BackUrls = new PreferenceBackUrlsRequest
+            {
+                Success = _mercadoPagoSettings.SuccessUrl,
+                Failure = _mercadoPagoSettings.FailureUrl,
+                Pending = _mercadoPagoSettings.PendingUrl
+            };
+
+            request.AutoReturn = "approved";
 
             // Itera sobre las publicaciones y crea un ítem para cada una
             foreach (var publicacion in publicaciones)
@@ -48,7 +64,7 @@ namespace BussinessLogic.Services
                     Title = publicacion.IdProductoNavigation.Nombre,    // Debes proporcionar el título de la publicación aquí
                     Quantity = publicacion.Cantidad,
                     CurrencyId = "ARS",
-                    UnitPrice =  (decimal?)publicacion.Precio,  // Debes proporcionar el precio de la publicación aquí
+                    UnitPrice = (decimal?)publicacion.Precio,  // Debes proporcionar el precio de la publicación aquí
                 };
 
                 request.Items.Add(item);

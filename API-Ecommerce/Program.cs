@@ -3,12 +3,17 @@ using DataAccess.Repository;
 using DataAccess.Entities;
 using DataAccess.IRepository;
 using Microsoft.EntityFrameworkCore;
+using BussinessLogic.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+//agrego la inyeccion de dependencia de mercado pago, para poder usar el servicio que cree
+builder.Services.Configure<MercadoPagoDevSettings>(builder.Configuration.GetSection("MercadoPagoDev"));
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -47,6 +52,8 @@ builder.Services.AddCors(opciones =>
 });
 
 var app = builder.Build();
+
+
 
 using(var scope = app.Services.CreateScope())
 {

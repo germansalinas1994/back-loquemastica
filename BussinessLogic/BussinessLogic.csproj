@@ -10,6 +10,7 @@
     <None Remove="DTO\" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DTO/MercadoPago/" />
     <Folder Include="DTO\" />
   </ItemGroup>
   <ItemGroup>
