@@ -44,7 +44,10 @@ namespace BussinessLogic.Services
 
             var request = new PreferenceRequest
             {
-                Items = new List<PreferenceItemRequest>()
+                Items = new List<PreferenceItemRequest>(),
+                Purpose = "wallet_purchase",
+            
+
             };
 
             request.BackUrls = new PreferenceBackUrlsRequest
@@ -66,6 +69,8 @@ namespace BussinessLogic.Services
                     CurrencyId = "ARS",
                     UnitPrice = (decimal?)publicacion.Precio,  // Debes proporcionar el precio de la publicación aquí
                 };
+
+
 
                 request.Items.Add(item);
             }

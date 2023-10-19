@@ -49,7 +49,7 @@ namespace BussinessLogic.Services
         {
             List<int> ids = publicacionCarrito.Select(p => p.Id).ToList();
             List<PublicacionDTO> publicaciones = (await _unitOfWork.PublicacionRepository.GetPublicacionesCarrito(ids)).Adapt<List<PublicacionDTO>>();
-
+            
             foreach (var publicacion in publicaciones)
             {
                 publicacion.Cantidad = publicacionCarrito.Where(p => p.Id == publicacion.IdPublicacion).FirstOrDefault().Cantidad;
