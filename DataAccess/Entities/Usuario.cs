@@ -16,6 +16,9 @@ public partial class Usuario
     public int? Dni { get; set; }
 
     public string? Telefono { get; set; }
+    public DateTime FechaAlta { get; set; }
+    public DateTime? FechaBaja { get; set; }
+    public DateTime? FechaModificacion { get; set; }
 
     public virtual ICollection<Domicilio> Domicilio { get; set; } = new List<Domicilio>();
 }

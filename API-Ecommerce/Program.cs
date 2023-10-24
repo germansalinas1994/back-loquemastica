@@ -36,6 +36,7 @@ builder.Services.AddScoped<ServiceCategoria>();
 builder.Services.AddScoped<ServiceProducto>();
 builder.Services.AddScoped<ServicePublicacion>();
 builder.Services.AddScoped<ServiceMercadoPago>();
+builder.Services.AddScoped<ServiceUsuario>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
