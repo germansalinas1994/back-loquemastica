@@ -63,7 +63,7 @@ namespace API_Ecommerce.Controllers
             {
                 if (email == null || email == "")
                 {
-                     return new ApiResponse("Email vacío, no se puede encontrar el usuario");
+                    return new ApiResponse("Email vacío, no se puede encontrar el usuario");
                 }
 
                 try
@@ -94,7 +94,7 @@ namespace API_Ecommerce.Controllers
 
         }
 
-         [HttpPost]
+        [HttpPost]
         [Route("/actualizarUsuario")]
         public async Task<ApiResponse> ActualizarUsuario([FromBody] UsuarioDTO usuario)
         {
@@ -102,40 +102,38 @@ namespace API_Ecommerce.Controllers
             {
                 if (usuario.Email == null || usuario.Email == "")
                 {
-                     return new ApiResponse("Email vacío, no se puede encontrar el usuario");
+                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
                 }
 
-                try
+                UsuarioDTO usuarioDTO = await _serviceUsuario.UpdateUsuario(usuario);
+
+                if (usuarioDTO == null)
                 {
-
-                    UsuarioDTO usuarioDTO = await _serviceUsuario.UpdateUsuario(usuario);
-
-                    if(usuarioDTO == null){
-                        return new ApiResponse("No se pudo actualizar el usuario");
-                    }
-
-                    ApiResponse response = new ApiResponse(new { data = usuarioDTO });
-                    return response;
-
-
+                    return new ApiResponse("No se pudo actualizar el usuario", statusCode: 400);
                 }
-                catch (Exception e)
-                {
-                    return new ApiResponse(new { data = "Hubo problemas para encontrar el usuario " });
-                }
-                // UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(usuario);
 
-
+                return new ApiResponse(usuarioDTO, statusCode: 200);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
-                throw new ApiException(ex);
-            }
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.IsError = true;
+                apiResponse.Message = "Ocurrió un error interno.";
+                apiResponse.StatusCode = 500;
 
+
+                if (e.Message.Contains("usuario.dni_UNIQUE"))
+                {
+                    apiResponse.Message = "El DNI ya existe";
+                    apiResponse.StatusCode = 409;
+
+
+
+                }
+                return apiResponse;
+
+
+            }
         }
 
 
