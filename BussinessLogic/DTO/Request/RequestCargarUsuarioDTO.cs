@@ -7,8 +7,6 @@ namespace BussinessLogic.DTO.Search
 {
     public class RequestCargarUsuarioDTO
     {
-        public string NombreUsuario { get; set; }
         public string Email { get; set; }
-        public string ImagenUsuario { get; set; }
     }
 }
