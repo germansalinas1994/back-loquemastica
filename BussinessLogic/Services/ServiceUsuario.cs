@@ -39,7 +39,6 @@ namespace BussinessLogic.Services
                 {
                     Usuario nuevoUsuario = new Usuario();
                     nuevoUsuario.Email = usuario.Email;
-                    nuevoUsuario.Nombre = usuario.NombreUsuario;
                     nuevoUsuario.FechaAlta = DateTime.Now;
                     nuevoUsuario.FechaModificacion = DateTime.Now;
 
