@@ -14,6 +14,7 @@ namespace DataAccess.IRepository
         IProductoRepository ProductoRepository { get; }
         IPublicacionRepository PublicacionRepository { get; }
         IUsuarioRepository UsuarioRepository { get; }
+        IDomicilioRepository DomicilioRepository { get; }
 
         //el beginTransactionAsync es para que se inicie la transaccion
         Task BeginTransactionAsync();

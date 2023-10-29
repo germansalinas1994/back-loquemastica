@@ -28,13 +28,15 @@ namespace DataAccess.Repository
             CategoriaRepository = new CategoriaRepository(_context);
             PublicacionRepository = new PublicacionRepository(_context);
             UsuarioRepository = new UsuarioRepository(_context);
+            DomicilioRepository = new DomicilioRepository(_context);
         }
 
         public IProductoRepository ProductoRepository { get; set; }
         public ICategoriaRepository CategoriaRepository { get; set; }
         public IPublicacionRepository PublicacionRepository { get; set; }
         public IUsuarioRepository UsuarioRepository { get; set; }
-        
+        public IDomicilioRepository DomicilioRepository { get; set; }
+
 
         public async Task BeginTransactionAsync()
         {
@@ -46,11 +48,12 @@ namespace DataAccess.Repository
                 }
 
             }
-            catch(Exception e){
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 _transaction?.Dispose();
                 _transaction = null;
-                
+
             }
 
 

@@ -136,6 +136,45 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("/getDomicilios")]
+        public async Task<ApiResponse> GetDomicilios([FromQuery] string email)
+        {
+            try
+            {
+                if (email == null || email == "")
+                {
+                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                }
+
+
+                List<DomicilioDTO> domicilios = (await _serviceUsuario.GetDomicilios(email)).ToList();
+
+                if (domicilios == null)
+                {
+                    return new ApiResponse("No se pudo encontrar el usuario", statusCode: 400);
+                }
+                if (domicilios.Count == 0)
+                {
+                    return new ApiResponse(domicilios, statusCode: 204);
+                }
+
+                return new ApiResponse(domicilios, statusCode: 200);
+            }
+            catch (Exception e)
+            {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.IsError = true;
+                apiResponse.Message = "Ocurrió un error interno.";
+                apiResponse.StatusCode = 500;
+
+
+
+                return apiResponse;
+
+
+            }
+        }
 
 
 

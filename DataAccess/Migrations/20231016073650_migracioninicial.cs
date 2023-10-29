@@ -210,7 +210,6 @@ namespace DataAccess.Migrations
                     aclaracion = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: true),
                     departamento = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: true),
                     id_usuario = table.Column<int>(type: "int", nullable: false),
-                    Domiciliocol = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: true)
                 },
                 constraints: table =>
                 {

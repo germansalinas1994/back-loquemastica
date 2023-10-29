@@ -17,7 +17,13 @@ public partial class Domicilio
 
     public int IdUsuario { get; set; }
 
-    public string? Domiciliocol { get; set; }
+    public string CodigoPostal {get; set;}
+
+    public DateTime FechaDesde {get; set;}
+
+    public DateTime? FechaHasta {get; set;}
+
+    public DateTime FechaActualizacion {get; set;}
 
     public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
 }

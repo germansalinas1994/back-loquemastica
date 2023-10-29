@@ -82,9 +82,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("varchar(45)")
                         .HasColumnName("departamento");
 
-                    b.Property<string>("Domiciliocol")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
+            
 
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int")

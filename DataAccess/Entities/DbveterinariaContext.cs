@@ -86,7 +86,6 @@ public partial class DbveterinariaContext : DbContext
             entity.Property(e => e.Departamento)
                 .HasMaxLength(45)
                 .HasColumnName("departamento");
-            entity.Property(e => e.Domiciliocol).HasMaxLength(45);
             entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
 
             entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Domicilio)

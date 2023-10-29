@@ -120,6 +120,34 @@ namespace BussinessLogic.Services
             }
         }
 
+        public async Task<IList<DomicilioDTO>> GetDomicilios(string email){
+
+
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == email)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    IList<Domicilio> domicilios = await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdUsuario == findUsuario.IdUsuario);
+
+                    return domicilios.Adapt<IList<DomicilioDTO>>();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw ex;
+            }
+        }
+
 
 
 
