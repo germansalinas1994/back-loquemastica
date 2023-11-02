@@ -54,13 +54,13 @@ public partial class DbveterinariaContext : DbContext
             entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
             entity.Property(e => e.FechaDesde)
-                .HasColumnType("date")
+                .HasColumnType("datetime")
                 .HasColumnName("fechaDesde");
             entity.Property(e => e.FechaHasta)
-                .HasColumnType("date")
+                .HasColumnType("datetime")
                 .HasColumnName("fechaHasta");
             entity.Property(e => e.FechaModificacion)
-                .HasColumnType("date")
+                .HasColumnType("datetime")
                 .HasColumnName("fechaModificacion");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(45)

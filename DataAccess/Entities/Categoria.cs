@@ -9,11 +9,11 @@ public partial class Categoria
 
     public string? Descripcion { get; set; }
 
-    public DateTime? FechaDesde { get; set; }
+    public DateTime FechaDesde { get; set; }
 
     public DateTime? FechaHasta { get; set; }
 
-    public DateTime? FechaModificacion { get; set; }
+    public DateTime FechaModificacion { get; set; }
 
     public string? Nombre { get; set; }
 
