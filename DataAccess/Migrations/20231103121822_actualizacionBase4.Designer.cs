@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20231103121822_actualizacionBase4")]
+    partial class actualizacionBase4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,6 +107,32 @@ namespace DataAccess.Migrations
                     b.ToTable("domicilio", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccess.Entities.Envio", b =>
+                {
+                    b.Property<int>("IdEnvio")
+                        .HasColumnType("int")
+                        .HasColumnName("idEnvio");
+
+                    b.Property<DateTime?>("FechaEnvio")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaEnvio");
+
+                    b.Property<int?>("IdEstadoEnvio")
+                        .HasColumnType("int")
+                        .HasColumnName("id_estadoEnvio");
+
+                    b.Property<float?>("Precio")
+                        .HasColumnType("float")
+                        .HasColumnName("precio");
+
+                    b.HasKey("IdEnvio")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "IdEstadoEnvio" }, "id_estadoEnvio_FKE_idx");
+
+                    b.ToTable("envio", (string)null);
+                });
+
             modelBuilder.Entity("DataAccess.Entities.Estadoenvio", b =>
                 {
                     b.Property<int>("IdEstadoEnvio")
@@ -138,6 +167,118 @@ namespace DataAccess.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("estadopedido", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Pago", b =>
+                {
+                    b.Property<int>("IdPago")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idPago");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaAlta");
+
+                    b.Property<int>("NroTransaccion")
+                        .HasColumnType("int")
+                        .HasColumnName("nroTransaccion");
+
+                    b.HasKey("IdPago")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("pago", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
+                {
+                    b.Property<int>("IdPedido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idPedido");
+
+                    b.Property<sbyte?>("Envio")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("envio");
+
+                    b.Property<DateTime?>("FechaAlta")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaAlta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaBaja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<int?>("IdEnvio")
+                        .HasColumnType("int")
+                        .HasColumnName("id_envio");
+
+                    b.Property<int?>("IdEstadoPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("id_estadoPedido");
+
+                    b.Property<int?>("IdPago")
+                        .HasColumnType("int")
+                        .HasColumnName("id_pago");
+
+                    b.Property<int?>("IdTipoPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("id_tipoPedido");
+
+                    b.Property<int?>("IdUsuario")
+                        .HasColumnType("int")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<int?>("NroPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("nroPedido");
+
+                    b.HasKey("IdPedido")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "IdEnvio" }, "id_envio_UNIQUE")
+                        .IsUnique();
+
+                    b.HasIndex(new[] { "IdEstadoPedido" }, "id_estadoPedido_idx");
+
+                    b.HasIndex(new[] { "IdPago" }, "id_pago_FKP_idx");
+
+                    b.HasIndex(new[] { "IdTipoPedido" }, "id_tipoPedido_FKP_idx");
+
+                    b.HasIndex(new[] { "IdUsuario" }, "id_usuario_FKP_idx");
+
+                    b.ToTable("pedido", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.PedidoPublicacion", b =>
+                {
+                    b.Property<int>("IdPedidoPublicacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPedido")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPedidoNavigationIdPedido")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPublicacion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPublicacionNavigationIdPublicacion")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPedidoPublicacion");
+
+                    b.HasIndex("IdPedidoNavigationIdPedido");
+
+                    b.HasIndex("IdPublicacionNavigationIdPublicacion");
+
+                    b.ToTable("PedidoPublicacion");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>
@@ -329,6 +470,44 @@ namespace DataAccess.Migrations
                     b.Navigation("IdUsuarioNavigation");
                 });
 
+            modelBuilder.Entity("DataAccess.Entities.Envio", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Pedido", "Pedido")
+                        .WithOne("IdEnvioNavigation")
+                        .HasForeignKey("DataAccess.Entities.Envio", "IdEnvio")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("id_envio_UNIQUE");
+
+                    b.HasOne("DataAccess.Entities.Estadoenvio", "IdEstadoEnvioNavigation")
+                        .WithMany("Envio")
+                        .HasForeignKey("IdEstadoEnvio")
+                        .HasConstraintName("id_estadoEnvio_FKE");
+
+                    b.Navigation("IdEstadoEnvioNavigation");
+
+                    b.Navigation("Pedido");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.PedidoPublicacion", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Pedido", "IdPedidoNavigation")
+                        .WithMany()
+                        .HasForeignKey("IdPedidoNavigationIdPedido")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Publicacion", "IdPublicacionNavigation")
+                        .WithMany()
+                        .HasForeignKey("IdPublicacionNavigationIdPublicacion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IdPedidoNavigation");
+
+                    b.Navigation("IdPublicacionNavigation");
+                });
+
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>
                 {
                     b.HasOne("DataAccess.Entities.Categoria", "IdCategoriaNavigation")
@@ -359,6 +538,16 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Entities.Categoria", b =>
                 {
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Estadoenvio", b =>
+                {
+                    b.Navigation("Envio");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
+                {
+                    b.Navigation("IdEnvioNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>

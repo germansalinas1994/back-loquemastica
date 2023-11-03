@@ -9,5 +9,4 @@ public partial class Estadoenvio
 
     public string? Descripcion { get; set; }
 
-    public virtual ICollection<Envio> Envio { get; set; } = new List<Envio>();
 }
