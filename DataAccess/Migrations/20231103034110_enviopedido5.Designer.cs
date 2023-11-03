@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20231103034110_enviopedido5")]
+    partial class enviopedido5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,8 +245,7 @@ namespace DataAccess.Migrations
                     b.HasKey("IdPedido")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IdEnvio" }, "id_envio_UNIQUE")
-                        .IsUnique();
+                    b.HasIndex(new[] { "IdEnvio" }, "id_envio_UNIQUE");
 
                     b.HasIndex(new[] { "IdEstadoPedido" }, "id_estadoPedido_idx");
 

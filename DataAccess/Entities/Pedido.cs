@@ -12,6 +12,7 @@ public partial class Pedido
     public int? IdPago { get; set; }
 
     public int? IdTipoPedido { get; set; }
+    public int? IdEnvio { get; set; }
 
     public int? IdPublicacion { get; set; }
 
@@ -26,8 +27,6 @@ public partial class Pedido
     public int? IdEstadoPedido { get; set; }
 
     public sbyte? Envio { get; set; }
+    public virtual Envio? IdEnvioNavigation { get; set; }
 
-    public string? Pedidocol { get; set; }
-
-    public virtual ICollection<Envio> EnvioNavigation { get; set; } = new List<Envio>();
 }

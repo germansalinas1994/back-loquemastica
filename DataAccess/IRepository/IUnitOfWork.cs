@@ -10,6 +10,7 @@ namespace DataAccess.IRepository
     // Esta interfaz es para que la implementen los repositorios de cada entidad, generico para que no se repita codigo
     public interface IUnitOfWork : IDisposable
     {
+        IGenericRepository<T> GenericRepository<T>() where T : class;
         ICategoriaRepository CategoriaRepository { get; }
         IProductoRepository ProductoRepository { get; }
         IPublicacionRepository PublicacionRepository { get; }

@@ -27,6 +27,7 @@ namespace BussinessLogic.Services
             try
             {
                 IList<Publicacion> publicaciones = await _unitOfWork.PublicacionRepository.GetAllPublicaciones();
+
                 IList<PublicacionDTO> publicacionesDTO = publicaciones.Adapt<IList<PublicacionDTO>>();
                 return publicacionesDTO;
             }

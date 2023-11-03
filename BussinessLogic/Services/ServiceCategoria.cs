@@ -22,7 +22,10 @@ namespace BussinessLogic.Services
         public async Task<IList<CategoriaDTO>> GetAllCategorias()
         {
             try
-            {   
+            {
+
+                // IList<Pedido> pedidos = await _unitOfWork.GenericRepository<Pedido>().GetAllIncludingRelations();   
+
                 // IList<Categoria> categorias = (await _unitOfWork.CategoriaRepository.GetAll()).OrderByDescending(x => x.FechaDesde).ToList();
                 //Traigo todas las categorias que no tengan fecha de baja
                 IList<Categoria> categorias = (await _unitOfWork.CategoriaRepository.GetByCriteria(x => x.FechaHasta == null)).OrderByDescending(x => x.FechaDesde).ToList();

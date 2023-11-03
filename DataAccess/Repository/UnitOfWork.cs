@@ -29,6 +29,7 @@ namespace DataAccess.Repository
             PublicacionRepository = new PublicacionRepository(_context);
             UsuarioRepository = new UsuarioRepository(_context);
             DomicilioRepository = new DomicilioRepository(_context);
+            
         }
 
         public IProductoRepository ProductoRepository { get; set; }
@@ -36,6 +37,12 @@ namespace DataAccess.Repository
         public IPublicacionRepository PublicacionRepository { get; set; }
         public IUsuarioRepository UsuarioRepository { get; set; }
         public IDomicilioRepository DomicilioRepository { get; set; }
+        
+        public IGenericRepository<T> GenericRepository<T>() where T : class
+        {
+            return new GenericRepository<T>(_context);
+        }
+
 
 
         public async Task BeginTransactionAsync()

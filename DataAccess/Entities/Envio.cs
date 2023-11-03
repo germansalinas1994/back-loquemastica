@@ -13,9 +13,7 @@ public partial class Envio
 
     public DateTime? FechaEnvio { get; set; }
 
-    public int? IdPedido { get; set; }
-
     public virtual Estadoenvio? IdEstadoEnvioNavigation { get; set; }
 
-    public virtual Pedido? IdPedidoNavigation { get; set; }
+    public virtual Pedido? Pedido { get; set; } 
 }

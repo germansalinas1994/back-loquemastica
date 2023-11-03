@@ -102,23 +102,18 @@ public partial class DbveterinariaContext : DbContext
 
             entity.HasIndex(e => e.IdEstadoEnvio, "id_estadoEnvio_FKE_idx");
 
-            entity.HasIndex(e => e.IdPedido, "id_pedido_FKE_idx");
-
             entity.Property(e => e.IdEnvio).HasColumnName("idEnvio");
             entity.Property(e => e.FechaEnvio)
                 .HasColumnType("date")
                 .HasColumnName("fechaEnvio");
             entity.Property(e => e.IdEstadoEnvio).HasColumnName("id_estadoEnvio");
-            entity.Property(e => e.IdPedido).HasColumnName("id_pedido");
             entity.Property(e => e.Precio).HasColumnName("precio");
 
             entity.HasOne(d => d.IdEstadoEnvioNavigation).WithMany(p => p.Envio)
                 .HasForeignKey(d => d.IdEstadoEnvio)
                 .HasConstraintName("id_estadoEnvio_FKE");
 
-            entity.HasOne(d => d.IdPedidoNavigation).WithMany(p => p.EnvioNavigation)
-                .HasForeignKey(d => d.IdPedido)
-                .HasConstraintName("id_pedido_FKE");
+ 
         });
 
         modelBuilder.Entity<Estadoenvio>(entity =>
@@ -170,12 +165,17 @@ public partial class DbveterinariaContext : DbContext
 
             entity.HasIndex(e => e.IdPublicacion, "id_publicacion_FKP_idx");
 
+            entity.HasIndex(e => e.IdEnvio, "id_envio_UNIQUE").IsUnique();
+
+
             entity.HasIndex(e => e.IdTipoPedido, "id_tipoPedido_FKP_idx");
 
             entity.HasIndex(e => e.IdUsuario, "id_usuario_FKP_idx");
 
             entity.Property(e => e.IdPedido).HasColumnName("idPedido");
             entity.Property(e => e.Envio).HasColumnName("envio");
+            entity.Property(e => e.IdEnvio).HasColumnName("id_envio");
+
             entity.Property(e => e.FechaAlta)
                 .HasColumnType("date")
                 .HasColumnName("fechaAlta");
@@ -191,7 +191,10 @@ public partial class DbveterinariaContext : DbContext
             entity.Property(e => e.IdTipoPedido).HasColumnName("id_tipoPedido");
             entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
             entity.Property(e => e.NroPedido).HasColumnName("nroPedido");
-            entity.Property(e => e.Pedidocol).HasMaxLength(45);
+            entity.HasOne(d => d.IdEnvioNavigation).WithOne(p => p.Pedido)
+            .HasForeignKey<Envio>(d => d.IdEnvio)
+            .HasConstraintName("id_envio_UNIQUE");
+
         });
 
         modelBuilder.Entity<Producto>(entity =>

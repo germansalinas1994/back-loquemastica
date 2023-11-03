@@ -12,6 +12,7 @@ namespace DataAccess.IRepository
     public interface IGenericRepository<T> where T : class
     {
         Task<IList<T>> GetAll();
+        Task<IList<T>> GetAllIncludingRelations();
         Task<T?> GetById(int id);
         Task<T> Insert(T entity);
         Task<T> Update(T entity);

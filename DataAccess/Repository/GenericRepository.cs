@@ -26,10 +26,12 @@ namespace DataAccess.Repository
         //Metodo para traer todos los datos de una tabla
         public async Task<IList<T>> GetAll()
         {
+            //quiero incluir los elementos de la tabla general de la base de datos
+
             return await _context.Set<T>().ToListAsync();
         }
         #endregion
-       
+
         #region buscar por ID
         //Metodo para traer un dato de un tipo de objeto por id
         public async Task<T?> GetById(int id)
@@ -45,7 +47,7 @@ namespace DataAccess.Repository
             return entity;
         }
         #endregion
-       
+
         #region insertar entidad generica
         //Metodo para insertar un dato de un tipo de objeto
         public async Task<T> Insert(T entity)
@@ -66,14 +68,14 @@ namespace DataAccess.Repository
             return entity;
         }
         #endregion
-       
+
         #region Eliminado Fisico
         //Metodo para eliminar un dato de un tipo de objeto, en este caso no se usa el soft delete
         public async Task<bool> HardDelete(int id)
         {
             var entity = await GetById(id);
 
-            if(entity == null)
+            if (entity == null)
             {
                 return false;
             }
@@ -124,13 +126,35 @@ namespace DataAccess.Repository
         //Otra forma de implementar el get by creiteria pero en este caso trae todo y busca en memoria, lo cual es mejor no hacer ya que no es tan eficiente
         //Es preferible usar el get by criteria ya que si hay muchos datos en la base es ineficiente
         #endregion
-        
+
         #region Buscar bajo algun criterio en memoria
         public async Task<IList<T>> GetByCriteriaMemory(Expression<Func<T, bool>> predicate)
         {
             return await Task.FromResult(_context.Set<T>().Where(predicate).ToList());
         }
         #endregion
+
+
+        public async Task<IList<T>> GetAllIncludingRelations()
+        {
+            var query = _context.Set<T>().AsQueryable();
+
+            // Obtener las propiedades de navegación de la entidad T
+            var navigationProperties = _context.Model.FindEntityType(typeof(T))
+                                            .GetNavigations()
+                                            .Select(navigation => navigation.Name);
+
+            // Incluir cada propiedad de navegación en la consulta
+            foreach (var propertyName in navigationProperties)
+            {
+                query = query.Include(propertyName);
+            }
+
+            return await query.ToListAsync();
+        }
+
+
+
 
     }
 
