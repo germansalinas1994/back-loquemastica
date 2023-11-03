@@ -7,6 +7,8 @@ using BussinessLogic.DTO.Search;
 using BussinessLogic.Services;
 using Microsoft.AspNetCore.Mvc;
 using AutoWrapper.Wrappers;
+using System.Text.Json;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -28,7 +30,7 @@ namespace API_Ecommerce.Controllers
         }
 
 
-        
+
         [HttpPost]
         [Route("/publicacionesCarritoMP")]
         public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
@@ -59,10 +61,79 @@ namespace API_Ecommerce.Controllers
         }
 
 
+        [HttpPost]
+        [Route("/webhook")]
+        public async Task<IActionResult> WebHookMP([FromBody] object payment)
+        {
+            try
+            {
+                if (payment == null)
+                {
+                    Console.WriteLine("Notificación de webhook inválida.");
+                    return BadRequest();
+                }
+
+                // Confirmar recepción inmediatamente
+
+                string jsonString = JsonSerializer.Serialize(payment);
+                WebhookPagoMercadoPago ordenDeCompra = JsonSerializer.Deserialize<WebhookPagoMercadoPago>(jsonString);
+
+                if (ordenDeCompra.type == "payment")
+                {
+                    string response = await _service.GetPaymentInfo(ordenDeCompra.data.id);
+
+
+                }
+
+
+
+
+
+
+
+                return Ok();
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex); // Log the exception
+                return BadRequest();
+            }
+
+        }
+
+
 
 
 
     }
+
+
 }
 
 
+
+public class WebhookMercadoPagoOrder
+{
+    public string resource { get; set; }
+    public string topic { get; set; }
+}
+
+
+public class WebhookPagoMercadoPago
+{
+    public string action { get; set; }
+    public string api_version { get; set; }
+    public DataPago data { get; set; }
+    public DateTime date_created { get; set; }
+    public long id { get; set; }
+    public bool live_mode { get; set; }
+    public string type { get; set; }
+    public string user_id { get; set; }
+}
+
+public class DataPago
+{
+    public string id { get; set; }
+}

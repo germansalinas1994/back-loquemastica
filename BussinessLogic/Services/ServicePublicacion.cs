@@ -60,23 +60,6 @@ namespace BussinessLogic.Services
 
         }
 
-        // public async Task<List<PublicacionDTO>> GetPublicacionesCarrito(List<SearchPublicacionCarritoDTO> publicacionCarrito)
-        // {
-        //     List<int> ids = publicacionCarrito.Select(p => p.Id).ToList();
-        //     List<Publicacion> publicaciones = await _unitOfWork.PublicacionRepository.GetPublicacionesCarrito(ids);
-        //     List<PublicacionDTO> publicacionesDTO = publicaciones.Adapt<List<PublicacionDTO>>();
-
-        //     foreach (var pub in publicacionesDTO)
-        //     {
-        //         var itemCarrito = publicacionCarrito.FirstOrDefault(p => p.Id == pub.IdPublicacion);
-        //         if (itemCarrito != null)
-        //         {
-        //             pub.Cantidad = itemCarrito.Cantidad;
-        //         }
-        //     }
-
-        //     return publicacionesDTO;
-        //}
 
 
     

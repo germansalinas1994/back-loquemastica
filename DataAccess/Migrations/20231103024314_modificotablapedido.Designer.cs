@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20231103024314_modificotablapedido")]
+    partial class modificotablapedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,7 +245,8 @@ namespace DataAccess.Migrations
                         .HasColumnName("nroPedido");
 
                     b.Property<string>("Pedidocol")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)");
 
                     b.HasKey("IdPedido")
                         .HasName("PRIMARY");

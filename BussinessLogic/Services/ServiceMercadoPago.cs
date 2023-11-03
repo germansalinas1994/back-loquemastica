@@ -14,6 +14,11 @@ using MercadoPago.Config;
 using MercadoPago.Client.Preference;
 using MercadoPago.Resource.Preference;
 using Microsoft.Extensions.Options;
+using MercadoPago.Client.Payment;
+using MercadoPago.Resource.Payment;
+using MercadoPago.Client;
+using MercadoPago.Client.MerchantOrder;
+using MercadoPago.Resource.MerchantOrder;
 // Agrega credenciales
 
 namespace BussinessLogic.Services
@@ -39,6 +44,7 @@ namespace BussinessLogic.Services
 
             //las credenciales que puse son de prueba, hay que cambiarlas por las de produccion, estas las cree en la cuenta del vendedor de prueba
             MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
+
             // Crea el objeto de request de la preference
 
 
@@ -46,7 +52,7 @@ namespace BussinessLogic.Services
             {
                 Items = new List<PreferenceItemRequest>(),
                 Purpose = "wallet_purchase",
-            
+
 
             };
 
@@ -56,6 +62,7 @@ namespace BussinessLogic.Services
                 Failure = _mercadoPagoSettings.FailureUrl,
                 Pending = _mercadoPagoSettings.PendingUrl
             };
+            request.NotificationUrl = _mercadoPagoSettings.NotificationUrl;
 
             request.AutoReturn = "approved";
 
@@ -64,6 +71,9 @@ namespace BussinessLogic.Services
             {
                 var item = new PreferenceItemRequest
                 {
+                    Id = publicacion.IdPublicacion.ToString(),
+                    Description = publicacion.IdProductoNavigation.Descripcion,
+                    PictureUrl = publicacion.IdProductoNavigation.UrlImagen,
                     Title = publicacion.IdProductoNavigation.Nombre,    // Debes proporcionar el título de la publicación aquí
                     Quantity = publicacion.Cantidad,
                     CurrencyId = "ARS",
@@ -81,6 +91,57 @@ namespace BussinessLogic.Services
             return preference.InitPoint;
 
         }
+
+
+        public async Task<string> GetPaymentInfo(string paymentId)
+        {
+            MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
+
+            // Crear el cliente de pago
+            var client = new PaymentClient();
+
+            // Obtener la información de pago
+            Payment payment = await client.GetAsync(long.Parse(paymentId));
+
+            long? idPago = payment.Id;
+            string status = payment.Status;
+            string statusDetail = payment.StatusDetail;
+            PaymentOrder paymentOrder = payment.Order;
+            
+
+            
+            return "funciono";
+        }
+
+        public async Task<string> GetMerchantOrder(string urlMercadopago)
+        {
+            string authorization = $"Bearer {_mercadoPagoSettings.AccessToken}";
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, urlMercadopago);
+                    request.Headers.Add("Authorization", authorization);
+
+                    using (var response = await client.SendAsync(request))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        var responseBody = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(responseBody);
+                        return responseBody;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return "Error";
+            }
+
+        }
+
+
 
     }
 }
