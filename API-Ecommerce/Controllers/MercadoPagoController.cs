@@ -63,14 +63,14 @@ namespace API_Ecommerce.Controllers
 
         [HttpPost]
         [Route("/webhook")]
-        public async Task<IActionResult> WebHookMP([FromBody] object payment)
+        public async Task<ApiResponse> WebHookMP([FromBody] object payment)
         {
             try
             {
                 if (payment == null)
                 {
                     Console.WriteLine("Notificación de webhook inválida.");
-                    return BadRequest();
+                    return new ApiResponse(500);
                 }
 
                 // Confirmar recepción inmediatamente
@@ -85,20 +85,22 @@ namespace API_Ecommerce.Controllers
 
                 }
 
+                return new ApiResponse(200);
 
 
 
 
 
 
-                return Ok();
+
+
 
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex); // Log the exception
-                return BadRequest();
+                return new ApiResponse(500);
             }
 
         }

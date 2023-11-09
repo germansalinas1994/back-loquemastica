@@ -153,7 +153,25 @@ namespace DataAccess.Repository
             return await query.ToListAsync();
         }
 
+        public async Task<IList<T>> GetByCriteriaIncludingRelations(Expression<Func<T, bool>> predicate)
+        {
+            var query = _context.Set<T>().AsQueryable();
 
+            // Obtener las propiedades de navegación de la entidad T
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var navigationProperties = entityType.GetNavigations().Select(nav => nav.Name);
+
+            // Aplicar las inclusiones de las propiedades de navegación
+            foreach (var navigationProperty in navigationProperties)
+            {
+                query = query.Include(navigationProperty);
+            }
+
+            // Aplicar el criterio de búsqueda
+            query = query.Where(predicate);
+
+            return await query.ToListAsync();
+        }
 
 
     }
