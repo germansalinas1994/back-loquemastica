@@ -32,6 +32,7 @@ public partial class DbveterinariaContext : DbContext
     public virtual DbSet<Tipopedido> Tipopedido { get; set; }
 
     public virtual DbSet<Usuario> Usuario { get; set; }
+    public virtual DbSet<Pedido> Pedido { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -222,6 +223,92 @@ public partial class DbveterinariaContext : DbContext
                 .HasMaxLength(45)
                 .HasColumnName("telefono");
         });
+
+    
+
+
+        //configurar asi los mapeos
+        
+
+        modelBuilder.Entity<Pedido>(entity =>
+      {
+          entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+          entity.ToTable("pedido");
+
+          entity.HasIndex(e => e.IdUsuario, "id_Usuario_FKPedido");
+
+          entity.Property(e => e.Id).HasColumnName("id");
+          entity.Property(e => e.FechaAlta)
+              .HasColumnType("datetime")
+              .IsRequired()
+              .HasColumnName("fechaAlta");
+          entity.Property(e => e.FechaBaja)
+              .HasColumnType("datetime")
+              .HasColumnName("fechaBaja");
+          entity.Property(e => e.FechaModificacion)
+              .HasColumnType("datetime")
+              .IsRequired()
+              .HasColumnName("fechaModificacion");
+          entity.Property(e => e.TotalPedido)
+                .HasColumnType("decimal")
+                .IsRequired()
+                .HasColumnName("total");
+          entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
+          entity.Property(e => e.Id_Orden_MercadoPago)
+              .HasColumnType("int")
+              .HasColumnName("orden_MercadoPago");
+
+          entity.HasOne(d => d.Usuario).WithMany(p => p.Pedido)
+              .HasForeignKey(d => d.IdUsuario)
+              .HasConstraintName("id_Usuario_FKPedido");
+      });
+
+
+
+
+        modelBuilder.Entity<Pago>(entity =>
+     {
+         entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+         entity.ToTable("pago");
+
+         entity.HasIndex(e => e.IdPedido, "id_Pedido_FKPedido").IsUnique();
+
+         entity.Property(e => e.Id).HasColumnName("id");
+         entity.Property(e => e.FechaAlta)
+             .HasColumnType("datetime")
+             .IsRequired()
+             .HasColumnName("fechaAlta");
+         entity.Property(e => e.FechaBaja)
+             .HasColumnType("datetime")
+             .HasColumnName("fechaBaja");
+         entity.Property(e => e.FechaModificacion)
+             .HasColumnType("datetime")
+             .IsRequired()
+             .HasColumnName("fechaModificacion");
+         entity.Property(e => e.Total)
+               .HasColumnType("decimal")
+               .IsRequired()
+               .HasColumnName("total");
+
+         entity.Property(e => e.EstadoPago)
+                .HasMaxLength(100)
+              .IsRequired()
+              .HasColumnName("estadoPago");
+         entity.Property(e => e.DetallePago)
+                .HasMaxLength(100)
+            .IsRequired()
+            .HasColumnName("detallePago");
+         entity.Property(e => e.IdPedido).HasColumnName("id_pedido");
+
+         // Configuramos la relación uno a uno y especificamos la propiedad de navegación en la entidad Pedido
+         entity.HasOne(d => d.Pedido)
+               .WithOne(p => p.Pago)
+               .HasForeignKey<Pago>(d => d.IdPedido)
+               .HasConstraintName("id_Pedido_FKPedido");
+
+       });
 
 
         OnModelCreatingPartial(modelBuilder);

@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20231103222858_agregoTabladepedido")]
+    partial class agregoTabladepedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,57 +141,6 @@ namespace DataAccess.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("estadopedido", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Pago", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    b.Property<string>("DetallePago")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("detallePago");
-
-                    b.Property<string>("EstadoPago")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("estadoPago");
-
-                    b.Property<DateTime?>("FechaAlta")
-                        .IsRequired()
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaAlta");
-
-                    b.Property<DateTime?>("FechaBaja")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaBaja");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .IsRequired()
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaModificacion");
-
-                    b.Property<int>("IdPedido")
-                        .HasColumnType("int")
-                        .HasColumnName("id_pedido");
-
-                    b.Property<decimal?>("Total")
-                        .IsRequired()
-                        .HasColumnType("decimal")
-                        .HasColumnName("total");
-
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "IdPedido" }, "id_Pedido_FKPedido")
-                        .IsUnique();
-
-                    b.ToTable("pago", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
@@ -422,18 +374,6 @@ namespace DataAccess.Migrations
                     b.Navigation("IdUsuarioNavigation");
                 });
 
-            modelBuilder.Entity("DataAccess.Entities.Pago", b =>
-                {
-                    b.HasOne("DataAccess.Entities.Pedido", "Pedido")
-                        .WithOne("Pago")
-                        .HasForeignKey("DataAccess.Entities.Pago", "IdPedido")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("id_Pedido_FKPedido");
-
-                    b.Navigation("Pedido");
-                });
-
             modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
                 {
                     b.HasOne("DataAccess.Entities.Usuario", "Usuario")
@@ -474,12 +414,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Entities.Categoria", b =>
                 {
                     b.Navigation("Producto");
-                });
-
-            modelBuilder.Entity("DataAccess.Entities.Pedido", b =>
-                {
-                    b.Navigation("Pago")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Producto", b =>

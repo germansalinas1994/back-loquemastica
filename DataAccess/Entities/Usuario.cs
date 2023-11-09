@@ -21,4 +21,5 @@ public partial class Usuario
     public DateTime? FechaModificacion { get; set; }
 
     public virtual ICollection<Domicilio> Domicilio { get; set; } = new List<Domicilio>();
+    public virtual ICollection<Pedido> Pedido { get; set; } = new List<Pedido>();
 }

@@ -21,8 +21,7 @@ namespace DataAccess.IRepository
         Task<IList<T>> GetByCriteria(Expression<Func<T, bool>> predicate);
         Task<IList<T>> GetByCriteriaMemory(Expression<Func<T, bool>> predicate);
         
-
-
+        Task<IList<T>> GetByCriteriaIncludingRelations(Expression<Func<T, bool>> predicate);
 
         //Otros metodos que se pueden implementar en el futuro
 

@@ -24,7 +24,7 @@ namespace BussinessLogic.Services
             try
             {
 
-                // IList<Pedido> pedidos = await _unitOfWork.GenericRepository<Pedido>().GetAllIncludingRelations();   
+                // IList<Producto> pedidos = await _unitOfWork.GenericRepository<Producto>().GetAllIncludingRelations();   
 
                 // IList<Categoria> categorias = (await _unitOfWork.CategoriaRepository.GetAll()).OrderByDescending(x => x.FechaDesde).ToList();
                 //Traigo todas las categorias que no tengan fecha de baja
