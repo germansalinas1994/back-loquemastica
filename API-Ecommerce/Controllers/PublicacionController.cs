@@ -107,10 +107,30 @@ namespace API_Ecommerce.Controllers
             }
 
         }
+        [HttpGet]
+        [Route("/publicaciones/{idCategoria}")]
+        public async Task<ApiResponse> GetPublicacionesByCategoria(int idCategoria)
+        {
+            if (idCategoria == 0)
+            {
+                throw new ApiException("Debe ingresar un id de categoria valido");
+            }
 
-
-
-
+            try
+            {
+                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesByCategoria(idCategoria);
+                ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw new ApiException(ex);
+            }
+        }
 
     }
 }

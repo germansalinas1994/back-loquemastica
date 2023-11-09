@@ -61,6 +61,14 @@ namespace BussinessLogic.Services
 
         }
 
+        public async Task<IList<PublicacionDTO>> GetPublicacionesByCategoria(int idCategoria )
+        {
+            List<Publicacion> publicaciones = (await _unitOfWork.GenericRepository<Publicacion>().GetByCriteria(x=> x.IdProductoNavigation.IdCategoriaNavigation.IdCategoria == idCategoria)).ToList();
+        
+        return publicaciones.Adapt<List<PublicacionDTO>>();
+        
+        }
+
 
 
     
