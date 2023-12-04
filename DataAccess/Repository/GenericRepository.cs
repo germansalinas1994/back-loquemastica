@@ -7,6 +7,7 @@ using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace DataAccess.Repository
 {
@@ -173,7 +174,7 @@ namespace DataAccess.Repository
             return await query.ToListAsync();
         }
 
-                public async Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+        public async Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
         {
             IQueryable<T> query = _context.Set<T>().AsQueryable();
 
@@ -186,8 +187,6 @@ namespace DataAccess.Repository
 
             return await query.ToListAsync();
         }
-
-
     }
 
 }
