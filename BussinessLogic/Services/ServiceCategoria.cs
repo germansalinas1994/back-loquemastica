@@ -70,7 +70,6 @@ namespace BussinessLogic.Services
                 categoriaEntity = await _unitOfWork.CategoriaRepository.Insert(categoriaEntity);
 
 
-                //lo rompo aproposito para probar que funcione el rollback
 
                 await _unitOfWork.CommitAsync();
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DataAccess.Entities;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace DataAccess.IRepository
 {
@@ -20,8 +21,10 @@ namespace DataAccess.IRepository
         Task<bool> SoftDelete(int id);
         Task<IList<T>> GetByCriteria(Expression<Func<T, bool>> predicate);
         Task<IList<T>> GetByCriteriaMemory(Expression<Func<T, bool>> predicate);
-        
+
         Task<IList<T>> GetByCriteriaIncludingRelations(Expression<Func<T, bool>> predicate);
+        Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null);
+
 
         //Otros metodos que se pueden implementar en el futuro
 
@@ -30,10 +33,10 @@ namespace DataAccess.IRepository
         // Task<bool> RemoveAll(IEnumerable<T> entities);
         // Task<IEnumerable<T>> AddRange(IEnumerable<T> entities);
 
-        
+
         // //el guid es para que el repositorio de cada entidad tenga un identificador unico pero esto ya se hace ya que tenemos los id autoincrementales
         // Guid GetGuid();
 
 
-    } 
+    }
 }

@@ -173,6 +173,20 @@ namespace DataAccess.Repository
             return await query.ToListAsync();
         }
 
+                public async Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+        {
+            IQueryable<T> query = _context.Set<T>().AsQueryable();
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            query = query.Where(predicate);
+
+            return await query.ToListAsync();
+        }
+
 
     }
 
