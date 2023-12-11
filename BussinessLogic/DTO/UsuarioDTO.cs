@@ -5,15 +5,17 @@ namespace BussinessLogic.DTO
 {
     public class UsuarioDTO
     {
-    public string? Nombre { get; set; }
 
-    public string? Apellido { get; set; }
+        public int IdUsuario { get; set; }
+        public string? Nombre { get; set; }
 
-    public string Email { get; set; } = null!;
+        public string? Apellido { get; set; }
 
-    public int? Dni { get; set; }
+        public string Email { get; set; } = null!;
 
-    public string? Telefono { get; set; }
+        public int? Dni { get; set; }
+
+        public string? Telefono { get; set; }
 
 
     }

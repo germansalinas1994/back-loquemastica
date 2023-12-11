@@ -7,6 +7,8 @@ using BussinessLogic.DTO.Search;
 using BussinessLogic.Services;
 using Microsoft.AspNetCore.Mvc;
 using AutoWrapper.Wrappers;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,6 +33,7 @@ namespace API_Ecommerce.Controllers
         [Route("/publicaciones")]
         public async Task<ApiResponse> GetPublicaciones()
         {
+
             try
             {
 
@@ -131,6 +134,8 @@ namespace API_Ecommerce.Controllers
                 throw new ApiException(ex);
             }
         }
+
+
 
     }
 }

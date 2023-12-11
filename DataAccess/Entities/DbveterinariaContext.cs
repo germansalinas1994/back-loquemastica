@@ -224,11 +224,11 @@ public partial class DbveterinariaContext : DbContext
                 .HasColumnName("telefono");
         });
 
-    
+
 
 
         //configurar asi los mapeos
-        
+
 
         modelBuilder.Entity<Pedido>(entity =>
       {
@@ -250,15 +250,14 @@ public partial class DbveterinariaContext : DbContext
               .HasColumnType("datetime")
               .IsRequired()
               .HasColumnName("fechaModificacion");
-          entity.Property(e => e.TotalPedido)
+
+
+          entity.Property(e => e.Total)
                 .HasColumnType("decimal")
                 .IsRequired()
                 .HasColumnName("total");
+                
           entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
-          entity.Property(e => e.Id_Orden_MercadoPago)
-              .HasColumnType("int")
-              .HasColumnName("orden_MercadoPago");
-
           entity.HasOne(d => d.Usuario).WithMany(p => p.Pedido)
               .HasForeignKey(d => d.IdUsuario)
               .HasConstraintName("id_Usuario_FKPedido");
@@ -291,15 +290,17 @@ public partial class DbveterinariaContext : DbContext
                .HasColumnType("decimal")
                .IsRequired()
                .HasColumnName("total");
+         entity.Property(e => e.IdPagoMercadoPago)
+             .HasColumnType("bigint")
+             .IsRequired()
+             .HasColumnName("idPagoMercadoPago");
 
          entity.Property(e => e.EstadoPago)
                 .HasMaxLength(100)
               .IsRequired()
               .HasColumnName("estadoPago");
-         entity.Property(e => e.DetallePago)
-                .HasMaxLength(100)
-            .IsRequired()
-            .HasColumnName("detallePago");
+
+
          entity.Property(e => e.IdPedido).HasColumnName("id_pedido");
 
          // Configuramos la relación uno a uno y especificamos la propiedad de navegación en la entidad Pedido
@@ -308,7 +309,7 @@ public partial class DbveterinariaContext : DbContext
                .HasForeignKey<Pago>(d => d.IdPedido)
                .HasConstraintName("id_Pedido_FKPedido");
 
-       });
+     });
 
 
         OnModelCreatingPartial(modelBuilder);

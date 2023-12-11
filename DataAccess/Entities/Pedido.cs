@@ -14,10 +14,9 @@ public partial class Pedido
     public DateTime? FechaBaja { get; set; }
 
     public DateTime? FechaModificacion { get; set; }
+    public decimal? Total { get; set; }
 
-    public int? Id_Orden_MercadoPago { get; set; }
-
-    public decimal? TotalPedido { get; set; }
+    public long Orden_MercadoPago { get; set; }
 
     public virtual Usuario Usuario { get; set; }
 

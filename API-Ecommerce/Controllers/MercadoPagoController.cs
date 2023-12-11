@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using AutoWrapper.Wrappers;
 using System.Text.Json;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,19 +24,39 @@ namespace API_Ecommerce.Controllers
         private ServiceMercadoPago _service;
         private ServicePublicacion _servicePublicacion;
 
+        private ServiceUsuario _serviceUsuario;
+
+
         //Inyecto el service por el constructor
-        public MercadoPagoController(ServiceMercadoPago service, ServicePublicacion servicePublicacion)
+        public MercadoPagoController(ServiceMercadoPago service, ServicePublicacion servicePublicacion, ServiceUsuario serviceUsuario)
         {
             _service = service;
             _servicePublicacion = servicePublicacion;
+            _serviceUsuario = serviceUsuario;
         }
 
 
-
+        [Authorize(Policy = "Cliente")]
         [HttpPost]
         [Route("/publicacionesCarritoMP")]
         public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
         {
+
+            //obtengo el usuario logueado desde el token
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+            //verifico que el usuario sea el mismo que tengo en la base 
+            UsuarioDTO usuario = await _serviceUsuario.GetUsuario(user);
+
+            if (usuario == null)
+            {
+                return new ApiResponse("Usuario no encontrado");
+            }
+
+
             try
             {
                 if (publicacionCarrito == null || publicacionCarrito.Count == 0)
@@ -43,7 +65,7 @@ namespace API_Ecommerce.Controllers
                 }
                 List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(publicacionCarrito)).ToList();
 
-                string prefenceId = await _service.GetPreferenceMP(publicaciones);
+                string prefenceId = await _service.GetPreferenceMP(publicaciones, usuario.IdUsuario);
 
                 ApiResponse response = new ApiResponse(new { data = prefenceId });
 
@@ -80,7 +102,7 @@ namespace API_Ecommerce.Controllers
 
                 if (ordenDeCompra.type == "payment")
                 {
-                    string response = await _service.GetPaymentInfo(ordenDeCompra.data.id);
+                    await _service.CrearPedido(ordenDeCompra.data.id);
 
 
                 }

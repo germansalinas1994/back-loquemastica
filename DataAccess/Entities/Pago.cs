@@ -14,9 +14,8 @@ public partial class Pago
     public DateTime? FechaBaja { get; set; }
 
     public DateTime? FechaModificacion { get; set; }
-
     public string EstadoPago { get; set; }
-    public string DetallePago { get; set; }
+    public long IdPagoMercadoPago { get; set; }
 
     public decimal? Total { get; set; }
 

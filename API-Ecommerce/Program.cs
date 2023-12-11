@@ -4,6 +4,10 @@ using DataAccess.Entities;
 using DataAccess.IRepository;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,11 +56,70 @@ builder.Services.AddCors(opciones =>
     });
 });
 
+
+//este tambien funciono
+
+// var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// .AddJwtBearer(options =>
+// {
+//     options.Authority = domain;
+//     options.Audience = builder.Configuration["Auth0:Audience"];
+//     options.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         NameClaimType = ClaimTypes.NameIdentifier
+//     };
+// });
+
+
+
+var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(options =>
+{
+    options.Authority = domain;
+    options.Audience = builder.Configuration["Auth0:Audience"];
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        NameClaimType = ClaimTypes.NameIdentifier,
+        // Configuración para validar la firma del token
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Auth0:SecretKey"])),
+
+        // Estas son configuraciones adicionales que puedes necesitar
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidIssuer = domain,
+        ValidAudience = builder.Configuration["Auth0:Audience"]
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c =>
+                c.Type == "user_rol" && c.Value == "Administrador")));
+
+    options.AddPolicy("Sucursal", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c =>
+                c.Type == "user_rol" && c.Value == "Sucursal")));
+
+    options.AddPolicy("Cliente", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c =>
+                c.Type == "user_rol" && c.Value == "Cliente")));
+});
+
+
 var app = builder.Build();
 
 
 
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
@@ -73,7 +136,7 @@ using(var scope = app.Services.CreateScope())
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) 
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -85,7 +148,9 @@ app.UseCors("politica");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

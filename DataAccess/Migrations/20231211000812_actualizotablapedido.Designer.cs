@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20231211000812_actualizotablapedido")]
+    partial class actualizotablapedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,6 +150,12 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    b.Property<string>("DetallePago")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("detallePago");
+
                     b.Property<string>("EstadoPago")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -168,8 +177,7 @@ namespace DataAccess.Migrations
                         .HasColumnName("fechaModificacion");
 
                     b.Property<long>("IdPagoMercadoPago")
-                        .HasColumnType("bigint")
-                        .HasColumnName("idPagoMercadoPago");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("IdPedido")
                         .HasColumnType("int")
@@ -214,8 +222,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_usuario");
 
-                    b.Property<long>("Orden_MercadoPago")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("Orden_MercadoPago")
+                        .HasColumnType("int")
+                        .HasColumnName("orden_MercadoPago");
 
                     b.Property<decimal?>("Total")
                         .IsRequired()

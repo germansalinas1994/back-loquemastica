@@ -26,19 +26,22 @@ namespace BussinessLogic.Services
     public class ServiceMercadoPago
     {
 
+
         //instancio el settings para poder usar las credenciales de mercado pago
         private readonly MercadoPagoDevSettings _mercadoPagoSettings;
+        private readonly IUnitOfWork _unitOfWork;
 
         //inyecto el settings por el constructor, para poder usar las credenciales de mercado pago
-        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions)
+        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork)
         {
             _mercadoPagoSettings = mercadoPagoSettingsOptions.Value;
+            _unitOfWork = unitOfWork;
         }
 
 
         //implementacion mercado pago 
 
-        public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones)
+        public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones, int idUsuario)
         {
 
 
@@ -52,8 +55,17 @@ namespace BussinessLogic.Services
             {
                 Items = new List<PreferenceItemRequest>(),
                 Purpose = "wallet_purchase",
+                Expires = true,
+                ExpirationDateFrom = DateTime.Now,
+                ExpirationDateTo = DateTime.Now.AddDays(1),
 
 
+
+            };
+
+            request.Metadata = new Dictionary<string, object>
+            {
+                {"idUsuario", idUsuario.ToString() }
             };
 
             request.BackUrls = new PreferenceBackUrlsRequest
@@ -93,7 +105,7 @@ namespace BussinessLogic.Services
         }
 
 
-        public async Task<string> GetPaymentInfo(string paymentId)
+        public async Task CrearPedido(string paymentId)
         {
             MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
 
@@ -103,14 +115,106 @@ namespace BussinessLogic.Services
             // Obtener la información de pago
             Payment payment = await client.GetAsync(long.Parse(paymentId));
 
-            long? idPago = payment.Id;
-            string status = payment.Status;
-            string statusDetail = payment.StatusDetail;
-            PaymentOrder paymentOrder = payment.Order;
-            
+            //si existe el pago y el status es aprobado, tengo que crear el pago en la base de datos
+            if (payment != null && payment.Status == "approved" && payment.StatusDetail == "accredited")
+            {
 
-            
-            return "funciono";
+
+                //Busco que no exista el pedido ni el pago en la base de datos
+                Pago pagoDB = (await _unitOfWork.GenericRepository<Pago>().GetByCriteria(x => x.IdPagoMercadoPago == payment.Id.Value)).FirstOrDefault();
+
+                if (pagoDB != null)
+                {
+                    //devuelvo ok para avisar a mercadopago que ya todo se ejecuto correctamente
+                    return;
+                }
+
+                //el id del pago es el id lo uso para guardarlo en el pago
+                long idPago = payment.Id.Value;
+
+                //tengo que recuperar el id usuario de la metadata
+                //el id usuario lo uso para guardarlo en el pedido
+                int idUsuario = Convert.ToInt32(payment.Metadata["id_usuario"].ToString());
+
+                //el id de la orden de pago lo uso para guardarlo en el pedido
+                long ordenDeCompra = payment.Order.Id.Value;
+
+                //recupero todos los id de las publicaciones con su cantidad
+                List<PublicacionDTO> publicaciones = new List<PublicacionDTO>();
+
+                foreach (var item in payment.AdditionalInfo.Items)
+                {
+                    PublicacionDTO publicacion = new PublicacionDTO();
+                    publicacion.IdPublicacion = Convert.ToInt32(item.Id);
+                    publicacion.Cantidad = item.Quantity.Value;
+                    publicaciones.Add(publicacion);
+                }
+
+                //recupero el total del pago
+                decimal total = payment.TransactionAmount.Value;
+
+                //abro una transaccion
+
+
+
+                await _unitOfWork.BeginTransactionAsync();
+
+                try
+                {
+                    //creo el pedido
+
+                    Pedido pedido = new Pedido();
+                    pedido.IdUsuario = idUsuario;
+                    pedido.FechaAlta = DateTime.Now;
+                    pedido.FechaModificacion = DateTime.Now;
+                    pedido.Orden_MercadoPago = ordenDeCompra;
+                    pedido.Total = total;
+
+                    pedido = await _unitOfWork.GenericRepository<Pedido>().Insert(pedido);
+
+                        
+
+                    //creo el pago
+
+                    Pago pago = new Pago();
+                    pago.IdPedido = pedido.Id;
+                    pago.FechaAlta = DateTime.Now;
+                    pago.FechaModificacion = DateTime.Now;
+                    pago.EstadoPago = "Aprobado";
+                    pago.IdPagoMercadoPago = idPago;
+                    pago.Total = total;
+
+                    pago = await _unitOfWork.GenericRepository<Pago>().Insert(pago);
+
+                    //actualizo el stock de las publicaciones
+
+                    foreach (var publicacion in publicaciones)
+                    {
+                        Publicacion publicacionBD = await _unitOfWork.GenericRepository<Publicacion>().GetById(publicacion.IdPublicacion);
+
+                        publicacionBD.Stock = publicacionBD.Stock - publicacion.Cantidad;
+
+                        await _unitOfWork.GenericRepository<Publicacion>().Update(publicacionBD);
+                    }
+
+                    //guardo los cambios
+
+                    await _unitOfWork.CommitAsync();
+
+
+                }
+
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    throw ex;
+                }
+            }
+            else
+            {
+                //si no existe el pago o el status no es aprobado, tengo que devolver un error
+                throw new Exception("Error en el pago");
+            }
         }
 
         public async Task<string> GetMerchantOrder(string urlMercadopago)
