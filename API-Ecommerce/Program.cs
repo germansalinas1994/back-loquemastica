@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Org.BouncyCastle.Crypto.Agreement.Srp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddScoped<ServiceProducto>();
 builder.Services.AddScoped<ServicePublicacion>();
 builder.Services.AddScoped<ServiceMercadoPago>();
 builder.Services.AddScoped<ServiceUsuario>();
+builder.Services.AddScoped<ServiceSucursal>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

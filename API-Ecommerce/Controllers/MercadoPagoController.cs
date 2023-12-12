@@ -41,7 +41,6 @@ namespace API_Ecommerce.Controllers
         [Route("/publicacionesCarritoMP")]
         public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
         {
-
             //obtengo el usuario logueado desde el token
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -82,6 +81,10 @@ namespace API_Ecommerce.Controllers
 
         }
 
+        private Task<string> DecodeJWT()
+        {
+            throw new NotImplementedException();
+        }
 
         [HttpPost]
         [Route("/webhook")]

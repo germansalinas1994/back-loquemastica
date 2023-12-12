@@ -114,6 +114,8 @@ namespace BussinessLogic.Services
 
             // Obtener la información de pago
             Payment payment = await client.GetAsync(long.Parse(paymentId));
+            await _unitOfWork.BeginTransactionAsync();
+
 
             //si existe el pago y el status es aprobado, tengo que crear el pago en la base de datos
             if (payment != null && payment.Status == "approved" && payment.StatusDetail == "accredited")
@@ -147,6 +149,7 @@ namespace BussinessLogic.Services
                     PublicacionDTO publicacion = new PublicacionDTO();
                     publicacion.IdPublicacion = Convert.ToInt32(item.Id);
                     publicacion.Cantidad = item.Quantity.Value;
+                    publicacion.Precio = item.UnitPrice.Value;
                     publicaciones.Add(publicacion);
                 }
 
@@ -157,7 +160,6 @@ namespace BussinessLogic.Services
 
 
 
-                await _unitOfWork.BeginTransactionAsync();
 
                 try
                 {
@@ -172,7 +174,7 @@ namespace BussinessLogic.Services
 
                     pedido = await _unitOfWork.GenericRepository<Pedido>().Insert(pedido);
 
-                        
+
 
                     //creo el pago
 
@@ -195,6 +197,18 @@ namespace BussinessLogic.Services
                         publicacionBD.Stock = publicacionBD.Stock - publicacion.Cantidad;
 
                         await _unitOfWork.GenericRepository<Publicacion>().Update(publicacionBD);
+
+                        //genero una row en la tabla publicacion_pedido
+
+                        PublicacionPedido publicacionPedido = new PublicacionPedido();
+                        publicacionPedido.IdPedido = pedido.Id;
+                        publicacionPedido.IdPublicacion = publicacionBD.IdPublicacion;
+                        publicacionPedido.Cantidad = publicacion.Cantidad;
+                        publicacionPedido.Precio = publicacion.Precio.Value;
+                        publicacionPedido.FechaAlta = DateTime.Now;
+                        publicacionPedido.FechaModificacion = DateTime.Now;
+
+                        await _unitOfWork.GenericRepository<PublicacionPedido>().Insert(publicacionPedido);
                     }
 
                     //guardo los cambios
