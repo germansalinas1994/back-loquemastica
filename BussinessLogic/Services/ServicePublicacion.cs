@@ -50,7 +50,7 @@ namespace BussinessLogic.Services
         {
             List<int> ids = publicacionCarrito.Select(p => p.Id).ToList();
             List<PublicacionDTO> publicaciones = (await _unitOfWork.PublicacionRepository.GetPublicacionesCarrito(ids)).Adapt<List<PublicacionDTO>>();
-            
+
             foreach (var publicacion in publicaciones)
             {
                 publicacion.Cantidad = publicacionCarrito.Where(p => p.Id == publicacion.IdPublicacion).FirstOrDefault().Cantidad;
@@ -61,17 +61,25 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task<IList<PublicacionDTO>> GetPublicacionesByCategoria(int idCategoria )
+        public async Task<IList<PublicacionDTO>> GetPublicacionesByCategoria(int idCategoria)
         {
-            List<Publicacion> publicaciones = (await _unitOfWork.GenericRepository<Publicacion>().GetByCriteria(x=> x.IdProductoNavigation.IdCategoriaNavigation.IdCategoria == idCategoria)).ToList();
-        
-        return publicaciones.Adapt<List<PublicacionDTO>>();
-        
+            List<Publicacion> publicaciones = (await _unitOfWork.GenericRepository<Publicacion>().GetByCriteria(x => x.IdProductoNavigation.IdCategoriaNavigation.IdCategoria == idCategoria)).ToList();
+
+            return publicaciones.Adapt<List<PublicacionDTO>>();
+
         }
 
+        public async Task<IList<PublicacionDTO>> GetPublicacionesSucursal(int sucursal)
+        {
+            IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
+                .GetByCriteriaIncludingSpecificRelations(
+                    x => x.IdSucursal == sucursal, // Tu criterio
 
-
-    
-   
+                    query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
+                                  .ThenInclude(producto => producto.IdCategoriaNavigation)
+                );
+            
+            return publicaciones.Adapt<IList<PublicacionDTO>>();
+        }
     }
 }

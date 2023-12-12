@@ -31,13 +31,14 @@ namespace API_Ecommerce.Controllers
         //Metodo para traer todas las categorias
         [HttpGet]
         [Route("/publicaciones")]
-        public async Task<ApiResponse> GetPublicaciones()
+        public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal)
         {
 
             try
             {
 
-                IList<PublicacionDTO> publicaciones = await _service.GetAllPublicaciones();
+                // IList<PublicacionDTO> publicaciones = await _service.GetAllPublicaciones();
+                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesSucursal(sucursal);
                 ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
                 return response;
             }
