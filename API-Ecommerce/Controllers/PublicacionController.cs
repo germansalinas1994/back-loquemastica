@@ -33,7 +33,6 @@ namespace API_Ecommerce.Controllers
         [Route("/publicaciones")]
         public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal)
         {
-
             try
             {
 
