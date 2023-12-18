@@ -17,6 +17,22 @@ namespace BussinessLogic.DTO
         public string? Departamento { get; set; }
         public string CodigoPostal { get; set; }
 
+        public string DescripcionCompleta
+        {
+            get
+            {
+
+                if(!Calle.Contains("Calle"))
+                {
+                    return "Calle" + " " + Calle + " " + "Nro" + " " + Altura + " " + Departamento;
+                }
+                else{
+                    return Calle + " " + "Nro" + " " + Altura + " " + Departamento;
+                }
+
+            }
+        }
+
 
     }
 }

@@ -126,16 +126,56 @@ namespace BussinessLogic.Services
             try
             {
                 Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == email)).FirstOrDefault();
-
+                
                 if (findUsuario != null)
                 {
-                    IList<Domicilio> domicilios = await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdUsuario == findUsuario.IdUsuario);
+
+                    IList<Domicilio> domicilios = (await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdUsuario == findUsuario.IdUsuario && x.FechaHasta == null)).OrderByDescending(x => x.FechaDesde).ToList();
 
                     return domicilios.Adapt<IList<DomicilioDTO>>();
                 }
                 else
                 {
-                    return null;
+                    throw new Exception("No se encontro el usuario");
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw ex;
+            }
+        }
+
+        public async Task<DomicilioDTO> PostDomicilio(DomicilioDTO domicilio, string user)
+        {
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    Domicilio nuevoDomicilio = new Domicilio();
+                    nuevoDomicilio.IdUsuario = findUsuario.IdUsuario;
+                    nuevoDomicilio.Altura = domicilio.Altura;
+                    nuevoDomicilio.Calle = domicilio.Calle;
+                    nuevoDomicilio.Departamento = domicilio.Departamento;
+                    nuevoDomicilio.CodigoPostal = domicilio.CodigoPostal;
+                    nuevoDomicilio.Aclaracion = domicilio.Aclaracion;
+                    nuevoDomicilio.FechaDesde = DateTime.Now;
+                    nuevoDomicilio.FechaActualizacion = DateTime.Now;
+
+                    await _unitOfWork.DomicilioRepository.Insert(nuevoDomicilio);
+                    await _unitOfWork.CommitAsync();
+
+                    return nuevoDomicilio.Adapt<DomicilioDTO>();
+                }
+                else
+                {
+                    throw new Exception("No se encontro el usuario");
                 }
             }
             catch (Exception ex)
@@ -148,12 +188,44 @@ namespace BussinessLogic.Services
             }
         }
 
+        public async Task<DomicilioDTO> EliminarDomicilio(int idDomicilio, string user)
+        {
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
 
+                if (findUsuario != null)
+                {
+                    Domicilio findDomicilio = (await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdDomicilio == idDomicilio && x.IdUsuario == findUsuario.IdUsuario)).FirstOrDefault();
 
+                    if (findDomicilio != null)
+                    {
+                        findDomicilio.FechaHasta = DateTime.Now;
+                        findDomicilio.FechaActualizacion = DateTime.Now;
 
+                        await _unitOfWork.DomicilioRepository.Update(findDomicilio);
+                        await _unitOfWork.CommitAsync();
 
-
-
-
+                        return findDomicilio.Adapt<DomicilioDTO>();
+                    }
+                    else
+                    {
+                        throw new Exception("No se encontro el domicilio");
+                    }
+                }
+                else
+                {
+                    throw new Exception("No se encontro el usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw ex;
+            }
+        }
     }
 }
