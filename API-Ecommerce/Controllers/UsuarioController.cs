@@ -59,10 +59,19 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/getUsuario")]
-        public async Task<ApiResponse> GetUsuario([FromQuery] string email)
+        [Authorize(Policy = "Cliente")]
+
+        public async Task<ApiResponse> GetUsuario()
         {
+
+
             try
             {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string email = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
                 if (email == null || email == "")
                 {
                     return new ApiResponse("Email vacío, no se puede encontrar el usuario");
