@@ -26,4 +26,6 @@ public partial class Domicilio
     public DateTime FechaActualizacion {get; set;}
 
     public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
+
+    public virtual ICollection<Envio> Envios { get; set; } = null!;
 }

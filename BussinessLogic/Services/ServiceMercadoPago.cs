@@ -41,7 +41,7 @@ namespace BussinessLogic.Services
 
         //implementacion mercado pago 
 
-        public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones, int idUsuario)
+        public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones, int idUsuario, int idDomicilio)
         {
 
 
@@ -49,6 +49,8 @@ namespace BussinessLogic.Services
             MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
 
             // Crea el objeto de request de la preference
+
+            //si el id del domicilio es 0, es porque es un retiro en sucursal, entonces no tengo que agregar el domicilio
 
 
             var request = new PreferenceRequest
@@ -59,15 +61,36 @@ namespace BussinessLogic.Services
                 ExpirationDateFrom = DateTime.Now,
                 ExpirationDateTo = DateTime.Now.AddDays(1),
 
-
-
             };
 
+            if (idDomicilio != 0)
+            {
+                Domicilio domicilio = await _unitOfWork.GenericRepository<Domicilio>().GetById(idDomicilio);
+
+                if (domicilio != null)
+                {
+
+                    //agrego el domicilio a la preferencia
+                    request.Shipments = new PreferenceShipmentsRequest
+                    {
+                        ReceiverAddress = new PreferenceReceiverAddressRequest
+                        {
+                            StreetName = domicilio.IdDomicilio.ToString(),
+
+                        }
+                    };
+
+                }
+            }
 
             request.Metadata = new Dictionary<string, object>
-            {
-                {"idUsuario", idUsuario.ToString() }
-            };
+                {
+                    {"idUsuario", idUsuario.ToString() },
+                    {"idDomicilio", idDomicilio.ToString() }
+                };
+
+
+
 
             request.BackUrls = new PreferenceBackUrlsRequest
             {
@@ -142,6 +165,14 @@ namespace BussinessLogic.Services
                 //el id de la orden de pago lo uso para guardarlo en el pedido
                 long ordenDeCompra = payment.Order.Id.Value;
 
+                int idDomicilio = Convert.ToInt32(payment.Metadata["id_domicilio"].ToString());
+
+                //si el id del domicilio es 0, es porque es un retiro en sucursal, entonces no tengo que agregar el domicilio
+
+
+
+
+
                 //recupero todos los id de las publicaciones con su cantidad
                 List<PublicacionDTO> publicaciones = new List<PublicacionDTO>();
 
@@ -174,6 +205,28 @@ namespace BussinessLogic.Services
                     pedido.Total = total;
 
                     pedido = await _unitOfWork.GenericRepository<Pedido>().Insert(pedido);
+
+                    if (idDomicilio != null && idDomicilio != 0)
+                    {
+                        Domicilio domicilio = await _unitOfWork.GenericRepository<Domicilio>().GetById(idDomicilio);
+
+                        if (domicilio != null)
+                        {
+                            //creo el envio
+
+                            Envio envio = new Envio();
+                            envio.IdPedido = pedido.Id;
+                            envio.FechaAlta = DateTime.Now;
+                            envio.FechaModificacion = DateTime.Now;
+                            envio.IdEstadoEnvio = Estadoenvio.Ingresado;
+                            envio.IdDomicilio = domicilio.IdDomicilio;
+
+                            await _unitOfWork.GenericRepository<Envio>().Insert(envio);
+                        }
+
+
+                    }
+
 
 
 

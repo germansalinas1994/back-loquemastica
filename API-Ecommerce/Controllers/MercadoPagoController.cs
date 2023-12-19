@@ -39,7 +39,8 @@ namespace API_Ecommerce.Controllers
         [Authorize(Policy = "Cliente")]
         [HttpPost]
         [Route("/publicacionesCarritoMP")]
-        public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
+        // public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
+        public async Task<ApiResponse> GetPreferenceMP([FromBody] PreferenceMercadoPagoDTO preferencePago)
         {
             //obtengo el usuario logueado desde el token
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -58,13 +59,13 @@ namespace API_Ecommerce.Controllers
 
             try
             {
-                if (publicacionCarrito == null || publicacionCarrito.Count == 0)
+                if (preferencePago.Publicaciones == null || preferencePago.Publicaciones.Count == 0)
                 {
                     return new ApiResponse("Carrito vacío");
                 }
-                List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(publicacionCarrito)).ToList();
+                List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(preferencePago.Publicaciones)).ToList();
 
-                string prefenceId = await _service.GetPreferenceMP(publicaciones, usuario.IdUsuario);
+                string prefenceId = await _service.GetPreferenceMP(publicaciones, usuario.IdUsuario, preferencePago.IdDomicilio);
 
                 ApiResponse response = new ApiResponse(new { data = prefenceId });
 
@@ -81,10 +82,6 @@ namespace API_Ecommerce.Controllers
 
         }
 
-        private Task<string> DecodeJWT()
-        {
-            throw new NotImplementedException();
-        }
 
         [HttpPost]
         [Route("/webhook")]
@@ -111,15 +108,6 @@ namespace API_Ecommerce.Controllers
                 }
 
                 return new ApiResponse(200);
-
-
-
-
-
-
-
-
-
 
             }
             catch (Exception ex)
@@ -164,3 +152,7 @@ public class DataPago
 {
     public string id { get; set; }
 }
+
+
+
+

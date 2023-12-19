@@ -33,6 +33,7 @@ public partial class DbveterinariaContext : DbContext
 
     public virtual DbSet<Usuario> Usuario { get; set; }
     public virtual DbSet<Pedido> Pedido { get; set; }
+    public virtual DbSet<Envio> Envio { get; set; }
     public virtual DbSet<PublicacionPedido> PublicacionPedido { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -257,7 +258,7 @@ public partial class DbveterinariaContext : DbContext
                 .HasColumnType("decimal")
                 .IsRequired()
                 .HasColumnName("total");
-                
+
           entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
           entity.HasOne(d => d.Usuario).WithMany(p => p.Pedido)
               .HasForeignKey(d => d.IdUsuario)
@@ -311,6 +312,60 @@ public partial class DbveterinariaContext : DbContext
                .HasConstraintName("id_Pedido_FKPedido");
 
      });
+
+
+        modelBuilder.Entity<Envio>(entity =>
+         {
+             entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+             entity.ToTable("Envio");
+
+             entity.HasIndex(e => e.IdPedido, "id_Pedido_FKPedidoEnvio").IsUnique();
+             entity.HasIndex(e => e.IdPedido, "id_Domicilio_FKDomicilio");
+
+             entity.Property(e => e.Id).HasColumnName("id");
+             entity.Property(e => e.FechaAlta)
+                 .HasColumnType("datetime")
+                 .IsRequired()
+                 .HasColumnName("fechaAlta");
+             entity.Property(e => e.FechaBaja)
+                 .HasColumnType("datetime")
+                 .HasColumnName("fechaBaja");
+             entity.Property(e => e.FechaModificacion)
+                 .HasColumnType("datetime")
+                 .IsRequired()
+                 .HasColumnName("fechaModificacion");
+
+
+
+
+             entity.Property(e => e.IdPedido).HasColumnName("id_pedido");
+
+             // Configuramos la relación uno a uno y especificamos la propiedad de navegación en la entidad Pedido
+             entity.HasOne(d => d.Pedido)
+                   .WithOne(p => p.Envio)
+                   .HasForeignKey<Envio>(d => d.IdPedido)
+                   .HasConstraintName("id_Pedido_FKPedidoEnvio");
+
+             // Configuración de la relación con EstadoEnvio
+             entity.HasOne(e => e.EstadoEnvio)
+               .WithMany(s => s.Envios)
+               .HasForeignKey(e => e.IdEstadoEnvio);
+
+             // Configuración de la relación con Domicilio
+             entity.HasOne(e => e.Domicilio)
+               .WithMany(d => d.Envios)
+               .HasForeignKey(e => e.IdDomicilio);
+
+         });
+
+
+
+
+
+
+
+
 
 
         OnModelCreatingPartial(modelBuilder);

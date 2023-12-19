@@ -78,7 +78,7 @@ namespace BussinessLogic.Services
                     query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
                                   .ThenInclude(producto => producto.IdCategoriaNavigation)
                 );
-            
+
             return publicaciones.Adapt<IList<PublicacionDTO>>();
         }
     }

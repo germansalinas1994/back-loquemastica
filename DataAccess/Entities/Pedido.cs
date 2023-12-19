@@ -22,4 +22,6 @@ public partial class Pedido
 
     public virtual Pago Pago { get; set; }
 
+    public virtual Envio Envio { get; set; }
+
 }
