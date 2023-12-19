@@ -227,5 +227,83 @@ namespace BussinessLogic.Services
                 throw ex;
             }
         }
+
+        public async Task<DomicilioDTO> GetDomicilio(int idDomicilio, string user)
+        {
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    Domicilio findDomicilio = (await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdDomicilio == idDomicilio && x.IdUsuario == findUsuario.IdUsuario)).FirstOrDefault();
+
+                    if (findDomicilio != null)
+                    {
+                        return findDomicilio.Adapt<DomicilioDTO>();
+                    }
+                    else
+                    {
+                        throw new Exception("No se encontro el domicilio");
+                    }
+                }
+                else
+                {
+                    throw new Exception("No se encontro el usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw ex;
+            }
+        }
+
+        public async Task<DomicilioDTO> EditarDomicilio(DomicilioDTO domicilio, string user)
+        {
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    Domicilio findDomicilio = (await _unitOfWork.DomicilioRepository.GetByCriteria(x => x.IdDomicilio == domicilio.IdDomicilio && x.IdUsuario == findUsuario.IdUsuario)).FirstOrDefault();
+
+                    if (findDomicilio != null)
+                    {
+                        findDomicilio.Altura = domicilio.Altura;
+                        findDomicilio.Calle = domicilio.Calle;
+                        findDomicilio.Departamento = domicilio.Departamento;
+                        findDomicilio.CodigoPostal = domicilio.CodigoPostal;
+                        findDomicilio.Aclaracion = domicilio.Aclaracion;
+                        findDomicilio.FechaActualizacion = DateTime.Now;
+
+                        await _unitOfWork.DomicilioRepository.Update(findDomicilio);
+                        await _unitOfWork.CommitAsync();
+
+                        return findDomicilio.Adapt<DomicilioDTO>();
+                    }
+                    else
+                    {
+                        throw new Exception("No se encontro el domicilio");
+                    }
+                }
+                else
+                {
+                    throw new Exception("No se encontro el usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw ex;
+            }
+        }
     }
 }

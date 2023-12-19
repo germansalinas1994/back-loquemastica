@@ -269,6 +269,85 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("/domicilio")]
+        [Authorize(Policy = "Cliente")]
+        public async Task<ApiResponse> GetDomicilio([FromQuery] int idDomicilio)
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+                if (user == null || user == "")
+                {
+                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                }
+
+                DomicilioDTO domicilioDTO = await _serviceUsuario.GetDomicilio(idDomicilio, user);
+
+                if (domicilioDTO == null)
+                {
+                    return new ApiResponse("No se pudo encontrar el domicilio", statusCode: 400);
+                }
+
+                return new ApiResponse(domicilioDTO, statusCode: 200);
+            }
+            catch (Exception e)
+            {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.IsError = true;
+                apiResponse.Message = "Ocurrió un error interno.";
+                apiResponse.StatusCode = 500;
+
+                return apiResponse;
+            }
+        }
+
+        [HttpPut]
+        [Route("/editarDomicilio")]
+        [Authorize(Policy = "Cliente")]
+        public async Task<ApiResponse> EditarDomicilio([FromBody] DomicilioDTO domicilio)
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+                if (user == null || user == "")
+                {
+                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                }
+                if (domicilio.IdDomicilio == 0 || domicilio.IdDomicilio == null)
+                {
+                    return new ApiResponse("No se pudo editar el domicilio", statusCode: 400);
+                }
+
+                DomicilioDTO domicilioDTO = await _serviceUsuario.EditarDomicilio(domicilio, user);
+
+                if (domicilioDTO == null)
+                {
+                    return new ApiResponse("No se pudo editar el domicilio", statusCode: 400);
+                }
+
+                return new ApiResponse(domicilioDTO, statusCode: 200);
+            }
+            catch (Exception e)
+            {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.IsError = true;
+                apiResponse.Message = "Ocurrió un error interno.";
+                apiResponse.StatusCode = 500;
+
+                return apiResponse;
+            }
+        }
+
+
 
 
 
