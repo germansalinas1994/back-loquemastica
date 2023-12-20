@@ -313,7 +313,29 @@ namespace BussinessLogic.Services
 
         }
 
+        public async Task<PedidoDTO> GetOrderMercadoPago(string merchantOrderId, string paymentId)
+        {
+            //busco el pago en la base de datos por el id del pago
+            long idPago = long.Parse(paymentId);
+            long idOrden = long.Parse(merchantOrderId);
 
+            Pedido pedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteria(x => x.Orden_MercadoPago == idOrden)).FirstOrDefault();
 
+            if(pedido == null)
+            {
+                throw new Exception("No se encontro el pedido");
+            }
+
+            Pago pago = (await _unitOfWork.GenericRepository<Pago>().GetByCriteria(x => x.IdPagoMercadoPago == idPago)).FirstOrDefault();
+
+            if(pago == null)
+            {
+                throw new Exception("No se encontro el pago");
+            }
+            
+            return pedido.Adapt<PedidoDTO>();
+
+            
+        }
     }
 }

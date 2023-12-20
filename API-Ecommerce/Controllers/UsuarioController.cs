@@ -348,10 +348,54 @@ namespace API_Ecommerce.Controllers
         }
 
 
+        [HttpGet]
+        [Authorize(Policy = "Cliente")]
+        [Route("/pedidos")]
+        public async Task<ApiResponse> GetPedidos()
+        {
+            ApiResponse apiResponse = new ApiResponse();
+
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                if (user == null || user == "")
+                {
+                    apiResponse.IsError = true;
+                    apiResponse.Message = "Email vacío, no se puede encontrar el usuario";
+                    apiResponse.StatusCode = 400;
+                    return apiResponse;
+                }
+
+                try
+                {
+                    List<PedidoDTO> pedidos = await _serviceUsuario.GetPedidos(user);
+                    return new ApiResponse(pedidos, statusCode: 200);
+
+                }
+                catch (Exception e)
+                {
+                    apiResponse.IsError = true;
+                    apiResponse.Message = e.Message;
+                    apiResponse.StatusCode = 400;
+                    return apiResponse;
+                }
 
 
 
+            }
+            catch (Exception e)
+            {
+                apiResponse.IsError = true;
+                apiResponse.Message = e.Message;
+                apiResponse.StatusCode = 500;
+                return apiResponse;
 
+            }
+        }
+        
 
     }
 }

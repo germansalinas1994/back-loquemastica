@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using Google.Protobuf.WellKnownTypes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -114,6 +115,54 @@ namespace API_Ecommerce.Controllers
             {
                 Console.WriteLine(ex); // Log the exception
                 return new ApiResponse(500);
+            }
+
+        }
+
+        [HttpGet]
+        [Route("/getOrderMercadoPago")]
+        [Authorize(Policy = "Cliente")]
+        public async Task<ApiResponse> GetOrderMercadoPago([FromQuery] string merchantOrderId, string paymentId)
+        {
+            try
+            {
+                ApiResponse response = new ApiResponse();
+
+                if (merchantOrderId == null || paymentId == null)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = "Faltan datos";
+                    response.IsError = true;
+                    return response;
+                }
+
+                try
+                {
+                    PedidoDTO pago = await _service.GetOrderMercadoPago(merchantOrderId, paymentId);
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "OK";
+                    response.Result = pago;
+                    return response;
+                    
+                }
+                catch (Exception ex)
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = ex.Message;
+                    response.IsError = true;
+                    return response;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw new ApiException(ex);
+
             }
 
         }

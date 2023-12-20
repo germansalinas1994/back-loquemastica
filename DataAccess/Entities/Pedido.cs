@@ -22,6 +22,9 @@ public partial class Pedido
 
     public virtual Pago Pago { get; set; }
 
-    public virtual Envio Envio { get; set; }
+    public virtual Envio? Envio { get; set; }
+
+        public virtual ICollection<PublicacionPedido> PublicacionPedido { get; set; } = new List<PublicacionPedido>();
+
 
 }

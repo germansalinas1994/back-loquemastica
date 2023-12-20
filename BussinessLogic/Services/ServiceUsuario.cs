@@ -120,13 +120,14 @@ namespace BussinessLogic.Services
             }
         }
 
-        public async Task<IList<DomicilioDTO>> GetDomicilios(string email){
+        public async Task<IList<DomicilioDTO>> GetDomicilios(string email)
+        {
 
 
             try
             {
                 Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == email)).FirstOrDefault();
-                
+
                 if (findUsuario != null)
                 {
 
@@ -138,7 +139,7 @@ namespace BussinessLogic.Services
                 {
                     throw new Exception("No se encontro el usuario");
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -305,5 +306,44 @@ namespace BussinessLogic.Services
                 throw ex;
             }
         }
+
+        public async Task<List<PedidoDTO>> GetPedidos(string? user)
+        {
+            List<Pedido> pedidos = new List<Pedido>();
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    pedidos = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteriaIncludingSpecificRelations(x => x.IdUsuario == findUsuario.IdUsuario && x.FechaBaja == null,
+                     query => query.Include(p => p.Pago)
+                                    .Include(p => p.Envio)
+                                    .ThenInclude(e => e.EstadoEnvio)
+                                    .Include(p => p.PublicacionPedido)
+                                    .ThenInclude(pp => pp.Publicacion)
+                                    .ThenInclude(publi => publi.IdProductoNavigation)
+                                    .ThenInclude(prod => prod.IdCategoriaNavigation)
+                                    .Include(p => p.PublicacionPedido)
+                                    .ThenInclude(pp => pp.Publicacion)
+                                    .ThenInclude(publi => publi.IdSucursalNavigation)
+                     )).ToList().OrderByDescending(x => x.FechaAlta).ToList();
+                     
+
+                    return pedidos.Adapt<List<PedidoDTO>>();
+
+                }
+                else
+                {
+                    throw new Exception("No se encontro el usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
+
+
