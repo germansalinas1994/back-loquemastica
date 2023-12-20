@@ -53,7 +53,7 @@ namespace API_Ecommerce.Controllers
 
         public async Task<ApiResponse> EliminarProducto(int id)
         {
-            await _service.EliminarPID(id);
+            await _service.EliminarProducto(id);
             ApiResponse response = new ApiResponse("El PID se eliminó exitosamente");
             return response;
         }
