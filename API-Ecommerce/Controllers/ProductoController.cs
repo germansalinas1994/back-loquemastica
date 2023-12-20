@@ -48,6 +48,17 @@ namespace API_Ecommerce.Controllers
 
         }
 
+        [HttpPut]
+        [Route("/pid/{id}")]
+
+        public async Task<ApiResponse> EliminarProducto(int id)
+        {
+            await _service.EliminarPID(id);
+            ApiResponse response = new ApiResponse("El PID se eliminó exitosamente");
+            return response;
+        }
+
+
 
 
     }

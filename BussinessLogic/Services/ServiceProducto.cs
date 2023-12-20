@@ -38,8 +38,24 @@ namespace BussinessLogic.Services
 
         }
 
+        public async Task<bool> EliminarProducto(int id)
+        {
+            Producto producto = await _unitOfWork.GenericRepository<Producto>().GetById(id);
 
-  
+            if (producto != null)
+            {
+                producto.FechaBaja = DateTime.Now;
+                producto.FechaModificacion = DateTime.Now;
+                Producto productoActualizado = await _unitOfWork.GenericRepository<Producto>().Update(producto);
+            }
+
+
+            return true;
+
+        }
+
+
+
 
     }
 }
