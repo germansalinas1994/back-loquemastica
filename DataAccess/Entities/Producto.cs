@@ -19,6 +19,9 @@ public partial class Producto
 
     public string? UrlImagen { get; set; }
 
+    public float? Precio { get; set; }
+
+
     public string? Nombre { get; set; }
 
     public virtual Categoria? IdCategoriaNavigation { get; set; }

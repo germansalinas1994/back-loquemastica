@@ -135,6 +135,7 @@ public partial class DbveterinariaContext : DbContext
             entity.Property(e => e.FechaModificacion)
                 .HasColumnType("date")
                 .HasColumnName("fechaModificacion");
+            entity.Property(e => e.Precio).HasColumnName("precio");
             entity.Property(e => e.IdCategoria).HasColumnName("id_categoria");
             entity.Property(e => e.Nombre).HasColumnName("nombre");
             entity.Property(e => e.UrlImagen).HasColumnName("urlImagen");
@@ -163,7 +164,6 @@ public partial class DbveterinariaContext : DbContext
                 .HasColumnName("fechaHasta");
             entity.Property(e => e.IdProducto).HasColumnName("id_producto");
             entity.Property(e => e.IdSucursal).HasColumnName("id_sucursal");
-            entity.Property(e => e.Precio).HasColumnName("precio");
             entity.Property(e => e.Stock).HasColumnName("stock");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Publicacion)

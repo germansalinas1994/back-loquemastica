@@ -113,7 +113,7 @@ namespace BussinessLogic.Services
                     Title = publicacion.IdProductoNavigation.Nombre,    // Debes proporcionar el título de la publicación aquí
                     Quantity = publicacion.Cantidad,
                     CurrencyId = "ARS",
-                    UnitPrice = (decimal?)publicacion.Precio,  // Debes proporcionar el precio de la publicación aquí
+                    UnitPrice = (decimal?)publicacion.IdProductoNavigation.Precio,  // Debes proporcionar el precio de la publicación aquí
                 };
 
 
@@ -174,14 +174,13 @@ namespace BussinessLogic.Services
 
 
                 //recupero todos los id de las publicaciones con su cantidad
-                List<PublicacionDTO> publicaciones = new List<PublicacionDTO>();
+                List<SearchPublicacionCarritoDTO> publicaciones = new List<SearchPublicacionCarritoDTO>();
 
                 foreach (var item in payment.AdditionalInfo.Items)
                 {
-                    PublicacionDTO publicacion = new PublicacionDTO();
-                    publicacion.IdPublicacion = Convert.ToInt32(item.Id);
+                    SearchPublicacionCarritoDTO publicacion = new SearchPublicacionCarritoDTO();
+                    publicacion.Id = Convert.ToInt32(item.Id);
                     publicacion.Cantidad = item.Quantity.Value;
-                    publicacion.Precio = item.UnitPrice.Value;
                     publicaciones.Add(publicacion);
                 }
 
@@ -228,8 +227,6 @@ namespace BussinessLogic.Services
                     }
 
 
-
-
                     //creo el pago
 
                     Pago pago = new Pago();
@@ -246,7 +243,8 @@ namespace BussinessLogic.Services
 
                     foreach (var publicacion in publicaciones)
                     {
-                        Publicacion publicacionBD = await _unitOfWork.GenericRepository<Publicacion>().GetById(publicacion.IdPublicacion);
+                        Publicacion publicacionBD = (await _unitOfWork.GenericRepository<Publicacion>().GetByCriteriaIncludingSpecificRelations(x => x.IdPublicacion == publicacion.Id,
+                        query => query.Include(x => x.IdProductoNavigation))).FirstOrDefault();
 
                         publicacionBD.Stock = publicacionBD.Stock - publicacion.Cantidad;
 
@@ -258,7 +256,7 @@ namespace BussinessLogic.Services
                         publicacionPedido.IdPedido = pedido.Id;
                         publicacionPedido.IdPublicacion = publicacionBD.IdPublicacion;
                         publicacionPedido.Cantidad = publicacion.Cantidad;
-                        publicacionPedido.Precio = publicacion.Precio.Value;
+                        publicacionPedido.Precio =  (decimal)publicacionBD.IdProductoNavigation.Precio.Value;
                         publicacionPedido.FechaAlta = DateTime.Now;
                         publicacionPedido.FechaModificacion = DateTime.Now;
 

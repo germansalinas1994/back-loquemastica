@@ -7,7 +7,7 @@ namespace BussinessLogic.DTO
     {
     public int IdPublicacion { get; set; }
 
-    public decimal? Precio { get; set; }
+    // public decimal? Precio { get; set; }
 
     public int Stock { get; set; }
     public ProductoDTO IdProductoNavigation { get; set; } = null!; 

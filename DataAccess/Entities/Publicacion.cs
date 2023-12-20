@@ -14,7 +14,7 @@ public partial class Publicacion
 
     public DateTime? FechaHasta { get; set; }
 
-    public float? Precio { get; set; }
+    // public float? Precio { get; set; }
 
     public int? IdProducto { get; set; }
 
