@@ -327,6 +327,8 @@ namespace BussinessLogic.Services
                                     .Include(p => p.PublicacionPedido)
                                     .ThenInclude(pp => pp.Publicacion)
                                     .ThenInclude(publi => publi.IdSucursalNavigation)
+                                    .Include(p => p.Envio)
+                                    .ThenInclude(e => e.Domicilio)
                      )).ToList().OrderByDescending(x => x.FechaAlta).ToList();
                      
 
