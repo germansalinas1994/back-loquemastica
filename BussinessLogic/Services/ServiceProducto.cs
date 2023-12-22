@@ -66,7 +66,7 @@ namespace BussinessLogic.Services
             nuevoProducto.FechaModificacion = DateTime.Now;
             nuevoProducto.Descripcion = producto.Descripcion;
             nuevoProducto.Nombre = producto.Nombre;
-            nuevoProducto.Precio = producto.Precio.Adapt<float>();
+            nuevoProducto.Precio = (float)producto.Precio;
             nuevoProducto.IdCategoria = producto.idCategoria;
             nuevoProducto.UrlImagen = producto.UrlImagen;
             Producto productoCargado = await _unitOfWork.GenericRepository<Producto>().Insert(nuevoProducto);

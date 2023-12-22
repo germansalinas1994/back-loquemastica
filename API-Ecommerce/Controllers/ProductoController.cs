@@ -90,8 +90,8 @@ namespace API_Ecommerce.Controllers
         }
 
         [HttpPut]
-        [Route("/productos")]
-        public async Task<ApiResponse> EditarPID([FromBody] ProductoDTO producto)
+        [Route("/producto")]
+        public async Task<ApiResponse> EditarProducto([FromBody] ProductoDTO producto)
         {
             await _service.EditarProducto(producto);
             ApiResponse response = new ApiResponse("El Producto se modificó exitosamente");
