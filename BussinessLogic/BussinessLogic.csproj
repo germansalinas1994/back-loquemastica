@@ -14,7 +14,7 @@
     <Folder Include="DTO\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoWrapper.Core" Version="4.5.1" />
+    <PackageReference Include="AutoWrapper.Core" Version="4.5.0" />
     <PackageReference Include="Mapster" Version="7.3.0" />
     <PackageReference Include="mercadopago-sdk" Version="2.3.3" />
     <PackageReference Include="QuestPDF" Version="2023.6.1" />
