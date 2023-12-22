@@ -187,6 +187,42 @@ namespace DataAccess.Repository
 
             return await query.ToListAsync();
         }
+
+        public async Task<T?> GetByIdIncludingRelations(int id)
+        {
+            try
+            {
+                var query = _context.Set<T>().AsQueryable();
+
+                // Obtener las propiedades de navegación de la entidad T
+                var entityType = _context.Model.FindEntityType(typeof(T));
+                var navigationProperties = entityType.GetNavigations().Select(nav => nav.Name);
+
+                // Incluir cada propiedad de navegación
+                foreach (var navigationProperty in navigationProperties)
+                {
+                    query = query.Include(navigationProperty);
+                }
+
+                // Construir el nombre de la clave primaria siguiendo la convención 'Id' + Nombre de la Clase
+                var primaryKey = "Id" + typeof(T).Name;
+
+                // Crear una expresión lambda para filtrar por la clave primaria
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, primaryKey);
+                var constant = Expression.Constant(id);
+                var equals = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
+
+                return await query.FirstOrDefaultAsync(lambda);
+            }
+            catch (Exception ex)
+            {
+                // Manejo de la excepción
+                // Aquí puedes registrar el error o manejarlo según tu política de manejo de errores.
+                throw;
+            }
+        }
     }
 
 }

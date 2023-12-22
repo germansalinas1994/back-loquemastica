@@ -20,6 +20,8 @@ namespace BussinessLogic.Services
             _unitOfWork = unitOfWork;
         }
 
+
+
         public async Task<List<SucursalDTO>> GetSucursales()
         {
             try
@@ -31,6 +33,22 @@ namespace BussinessLogic.Services
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        public async Task<bool> EliminarSucursal(int id)
+        {
+
+            Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
+            if (sucursal == null)
+            {
+                sucursal.FechaBaja = DateTime.Now;
+                sucursal.FechaModificacion = DateTime.Now;
+                Sucursal sucursalActualizada = await _unitOfWork.GenericRepository<Sucursal>().Update(sucursal);
+            }
+
+            return true;
+
+
         }
     }
 }

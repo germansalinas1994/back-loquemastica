@@ -11,5 +11,13 @@ public partial class Sucursal
 
     public string? Nombre { get; set; }
 
+    public string EmailSucursal { get; set; }
+
+    public DateTime FechaAlta { get; set; }
+
+    public DateTime? FechaBaja { get; set; }
+
+    public DateTime? FechaModificacion { get; set; }
+
     public virtual ICollection<Publicacion> Publicacion { get; set; } = new List<Publicacion>();
 }
