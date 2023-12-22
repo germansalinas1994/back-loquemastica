@@ -395,7 +395,38 @@ namespace API_Ecommerce.Controllers
 
             }
         }
-        
+
+        [HttpGet]
+        [Authorize(Policy = "Cliente")]
+        [Route("/generarFactura/{idPedido}")]
+
+        public async Task<IActionResult> GenerarFacturaPedido(int idPedido)
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+
+                byte[] pdfBytes = await _serviceUsuario.CrearPDF(idPedido);
+                return File(pdfBytes, "application/pdf", "Factura.pdf");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+
 
     }
 }

@@ -29,13 +29,16 @@ namespace BussinessLogic.Services
 
         //instancio el settings para poder usar las credenciales de mercado pago
         private readonly MercadoPagoDevSettings _mercadoPagoSettings;
+        private ServiceUsuario _serviceUsuario;
+
         private readonly IUnitOfWork _unitOfWork;
 
         //inyecto el settings por el constructor, para poder usar las credenciales de mercado pago
-        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork)
+        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork, ServiceUsuario serviceUsuario)
         {
             _mercadoPagoSettings = mercadoPagoSettingsOptions.Value;
             _unitOfWork = unitOfWork;
+            _serviceUsuario = serviceUsuario;
         }
 
 
@@ -256,7 +259,7 @@ namespace BussinessLogic.Services
                         publicacionPedido.IdPedido = pedido.Id;
                         publicacionPedido.IdPublicacion = publicacionBD.IdPublicacion;
                         publicacionPedido.Cantidad = publicacion.Cantidad;
-                        publicacionPedido.Precio =  (decimal)publicacionBD.IdProductoNavigation.Precio.Value;
+                        publicacionPedido.Precio = (decimal)publicacionBD.IdProductoNavigation.Precio.Value;
                         publicacionPedido.FechaAlta = DateTime.Now;
                         publicacionPedido.FechaModificacion = DateTime.Now;
 
@@ -266,6 +269,11 @@ namespace BussinessLogic.Services
                     //guardo los cambios
 
                     await _unitOfWork.CommitAsync();
+
+
+
+                    // var facturaPdfBytes = await _serviceUsuario.CrearPDF(pedido.Id); // Asumiendo que esto devuelve el PDF como un array de bytes
+                    
 
 
                 }
@@ -319,21 +327,23 @@ namespace BussinessLogic.Services
 
             Pedido pedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteria(x => x.Orden_MercadoPago == idOrden)).FirstOrDefault();
 
-            if(pedido == null)
+            if (pedido == null)
             {
                 throw new Exception("No se encontro el pedido");
             }
 
             Pago pago = (await _unitOfWork.GenericRepository<Pago>().GetByCriteria(x => x.IdPagoMercadoPago == idPago)).FirstOrDefault();
 
-            if(pago == null)
+            if (pago == null)
             {
                 throw new Exception("No se encontro el pago");
             }
-            
+
             return pedido.Adapt<PedidoDTO>();
 
-            
+
         }
+
+
     }
 }

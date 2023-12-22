@@ -18,6 +18,7 @@ namespace BussinessLogic.DTO
     public virtual List<PublicacionPedidoDTO> PublicacionPedido { get; set; } = new List<PublicacionPedidoDTO>();
 
     public virtual EnvioDTO Envio { get; set; }
+    public DateTime? FechaAlta { get; set; }
 
 
     }
