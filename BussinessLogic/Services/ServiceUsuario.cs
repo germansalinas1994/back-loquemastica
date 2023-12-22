@@ -6,6 +6,7 @@ using DataAccess.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
+using AutoWrapper.Wrappers;
 
 
 
@@ -15,11 +16,14 @@ namespace BussinessLogic.Services
     {
         //Instancio el UnitOfWork que vamos a usar
         private readonly IUnitOfWork _unitOfWork;
+        private ServiceReporte _serviceReporte;
+
 
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceUsuario(IUnitOfWork unitOfWork)
+        public ServiceUsuario(IUnitOfWork unitOfWork, ServiceReporte serviceReporte)
         {
             _unitOfWork = unitOfWork;
+            _serviceReporte = serviceReporte;
         }
 
 
@@ -327,8 +331,10 @@ namespace BussinessLogic.Services
                                     .Include(p => p.PublicacionPedido)
                                     .ThenInclude(pp => pp.Publicacion)
                                     .ThenInclude(publi => publi.IdSucursalNavigation)
+                                    .Include(p => p.Envio)
+                                    .ThenInclude(e => e.Domicilio)
                      )).ToList().OrderByDescending(x => x.FechaAlta).ToList();
-                     
+
 
                     return pedidos.Adapt<List<PedidoDTO>>();
 
@@ -337,6 +343,52 @@ namespace BussinessLogic.Services
                 {
                     throw new Exception("No se encontro el usuario");
                 }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<byte[]> CrearPDF(int idPedido)
+        {
+            try
+            {
+                //busco el pedido para ese usuario y con ese id
+                // Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
+                // if(findUsuario == null)
+                // {
+                //     throw new ApiException("No se encontro el usuario", 404, "No se encontro el usuario");
+                // }
+
+                Pedido findPedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteriaIncludingSpecificRelations(x => x.Id == idPedido,
+                     query => query.Include(p => p.Pago)
+                                    .Include(p => p.Envio)
+                                    .ThenInclude(e => e.EstadoEnvio)
+                                    .Include(p => p.PublicacionPedido)
+                                    .ThenInclude(pp => pp.Publicacion)
+                                    .ThenInclude(publi => publi.IdProductoNavigation)
+                                    .ThenInclude(prod => prod.IdCategoriaNavigation)
+                                    .Include(p => p.PublicacionPedido)
+                                    .ThenInclude(pp => pp.Publicacion)
+                                    .ThenInclude(publi => publi.IdSucursalNavigation)
+                                    .Include(p => p.Envio)
+                                    .ThenInclude(e => e.Domicilio)
+                                    .Include(p => p.Usuario)
+                     )).FirstOrDefault();
+                
+                if(findPedido == null)
+                {
+                    throw new ApiException("No se encontro el pedido", 404, "No se encontro el pedido");
+                }
+
+                PedidoDTO pedido = findPedido.Adapt<PedidoDTO>();
+
+                //creo el pdf
+                return await _serviceReporte.CrearPDF(pedido);
+            }
+            catch(ApiException e){
+                throw e;
             }
             catch (Exception ex)
             {

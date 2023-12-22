@@ -9,6 +9,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using Org.BouncyCastle.Crypto.Agreement.Srp;
+using QuestPDF.Infrastructure;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// Configurar la licencia de QuestPDF
+QuestPDF.Settings.License = LicenseType.Community;
 //agrego la inyeccion de dependencia de mercado pago, para poder usar el servicio que cree
 builder.Services.Configure<MercadoPagoDevSettings>(builder.Configuration.GetSection("MercadoPagoDev"));
 
@@ -43,6 +50,7 @@ builder.Services.AddScoped<ServicePublicacion>();
 builder.Services.AddScoped<ServiceMercadoPago>();
 builder.Services.AddScoped<ServiceUsuario>();
 builder.Services.AddScoped<ServiceSucursal>();
+builder.Services.AddScoped<ServiceReporte>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

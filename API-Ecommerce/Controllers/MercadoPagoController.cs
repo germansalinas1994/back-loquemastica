@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using Google.Protobuf.WellKnownTypes;
 
+
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API_Ecommerce.Controllers
@@ -143,7 +144,7 @@ namespace API_Ecommerce.Controllers
                     response.Message = "OK";
                     response.Result = pago;
                     return response;
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -171,7 +172,9 @@ namespace API_Ecommerce.Controllers
 
 
 
+
     }
+
 
 
 }
