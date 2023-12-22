@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using AutoWrapper.Wrappers;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,29 +32,39 @@ namespace API_Ecommerce.Controllers
 
         [HttpPost]
         [Route("/cargarUsuario")]
+        [Authorize(Policy = "Cliente")]
+
         public async Task<ApiResponse> CargarUsuarioAuth0([FromBody] RequestCargarUsuarioDTO usuario)
         {
             try
             {
-                if (usuario.Email == null || usuario.Email == "")
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+
+
+                if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío");
+                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
-                UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(usuario);
+                UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(user);
 
                 ApiResponse response = new ApiResponse(new { data = "Se ha cargado el usuario correctamente" });
 
                 return response;
             }
-            catch (Exception ex)
+            catch (ApiException)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
-                throw new ApiException(ex);
+                throw;
             }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
 
         }
 
@@ -64,7 +75,6 @@ namespace API_Ecommerce.Controllers
         public async Task<ApiResponse> GetUsuario()
         {
 
-
             try
             {
                 var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -74,77 +84,71 @@ namespace API_Ecommerce.Controllers
 
                 if (email == null || email == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario");
+                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
-                try
-                {
-
-                    UsuarioDTO usuarioDTO = await _serviceUsuario.GetUsuario(email);
-                    ApiResponse response = new ApiResponse(new { data = usuarioDTO });
-                    return response;
 
 
-                }
-                catch (Exception e)
-                {
-                    return new ApiResponse(new { data = "Hubo problemas para encontrar el usuario " });
-                }
-                // UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(usuario);
-
+                UsuarioDTO usuarioDTO = await _serviceUsuario.GetUsuario(email);
+                return new ApiResponse(new { data = usuarioDTO });
 
             }
-            catch (Exception ex)
+            catch (ApiException)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
-                throw new ApiException(ex);
+                throw;
             }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
 
         }
 
         [HttpPost]
         [Route("/actualizarUsuario")]
+        [Authorize(Policy = "Cliente")]
+
         public async Task<ApiResponse> ActualizarUsuario([FromBody] UsuarioDTO usuario)
         {
             try
             {
-                if (usuario.Email == null || usuario.Email == "")
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                string email = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+
+
+
+
+                if (string.IsNullOrEmpty(email))
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
+                if (usuario == null)
+                {
+                    throw new ApiException("No se pudo actualizar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
+                }
+
 
                 UsuarioDTO usuarioDTO = await _serviceUsuario.UpdateUsuario(usuario);
 
                 if (usuarioDTO == null)
                 {
-                    return new ApiResponse("No se pudo actualizar el usuario", statusCode: 400);
+                    throw new ApiException("No se pudo actualizar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
-                return new ApiResponse(usuarioDTO, statusCode: 200);
+                return new ApiResponse(usuarioDTO, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-
-                if (e.Message.Contains("usuario.dni_UNIQUE"))
-                {
-                    apiResponse.Message = "El DNI ya existe";
-                    apiResponse.StatusCode = 409;
-
-
-
-                }
-                return apiResponse;
-
-
+                throw new ApiException(e);
             }
+
         }
 
         [HttpGet]
@@ -161,36 +165,29 @@ namespace API_Ecommerce.Controllers
 
                 if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
                 }
 
 
                 List<DomicilioDTO> domicilios = (await _serviceUsuario.GetDomicilios(user)).ToList();
 
-                if (domicilios == null)
-                {
-                    return new ApiResponse("No se pudo encontrar el usuario", statusCode: 400);
-                }
+
                 if (domicilios.Count == 0)
                 {
-                    return new ApiResponse(domicilios, statusCode: 204);
+                    return new ApiResponse(domicilios, (int)HttpStatusCode.NoContent);
                 }
 
-                return new ApiResponse(domicilios, statusCode: 200);
+                return new ApiResponse(domicilios, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-
-
-                return apiResponse;
-
-
+                throw new ApiException(e);
             }
+
         }
 
         [HttpPost]
@@ -207,26 +204,30 @@ namespace API_Ecommerce.Controllers
 
                 if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
+                }
+
+                if (domicilio == null)
+                {
+                    throw new ApiException("No se pudo agregar el domicilio", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
                 DomicilioDTO domicilioDTO = await _serviceUsuario.PostDomicilio(domicilio, user);
 
                 if (domicilioDTO == null)
                 {
-                    return new ApiResponse("No se pudo agregar el domicilio", statusCode: 400);
+                    throw new ApiException("No se pudo agregar el domicilio", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
-                return new ApiResponse(domicilioDTO, statusCode: 200);
+                return new ApiResponse(domicilioDTO, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-                return apiResponse;
+                throw new ApiException(e);
             }
         }
 
@@ -246,26 +247,25 @@ namespace API_Ecommerce.Controllers
 
                 if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
                 }
 
                 DomicilioDTO domicilioDTO = await _serviceUsuario.EliminarDomicilio(idDomicilio, user);
 
                 if (domicilioDTO == null)
                 {
-                    return new ApiResponse("No se pudo eliminar el domicilio", statusCode: 400);
+                    throw new ApiException("No se encontró el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
-                return new ApiResponse("Se eliminó correctamente", statusCode: 200);
+                return new ApiResponse("Se eliminó correctamente", (int)HttpStatusCode.NoContent);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-                return apiResponse;
+                throw new ApiException(e);
             }
         }
 
@@ -283,27 +283,31 @@ namespace API_Ecommerce.Controllers
 
                 if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
+                }
+                if (idDomicilio == 0 || idDomicilio == null)
+                {
+                    throw new ApiException("No se pudo encontrar el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
                 DomicilioDTO domicilioDTO = await _serviceUsuario.GetDomicilio(idDomicilio, user);
 
                 if (domicilioDTO == null)
                 {
-                    return new ApiResponse("No se pudo encontrar el domicilio", statusCode: 400);
+                    throw new ApiException("No se pudo encontrar el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
-                return new ApiResponse(domicilioDTO, statusCode: 200);
+                return new ApiResponse(domicilioDTO, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-                return apiResponse;
+                throw new ApiException(e);
             }
+
         }
 
         [HttpPut]
@@ -320,31 +324,31 @@ namespace API_Ecommerce.Controllers
 
                 if (user == null || user == "")
                 {
-                    return new ApiResponse("Email vacío, no se puede encontrar el usuario", statusCode: 400);
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
                 }
                 if (domicilio.IdDomicilio == 0 || domicilio.IdDomicilio == null)
                 {
-                    return new ApiResponse("No se pudo editar el domicilio", statusCode: 400);
+                    throw new ApiException("No se pudo editar el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
                 DomicilioDTO domicilioDTO = await _serviceUsuario.EditarDomicilio(domicilio, user);
 
                 if (domicilioDTO == null)
                 {
-                    return new ApiResponse("No se pudo editar el domicilio", statusCode: 400);
+                    throw new ApiException("No se pudo editar el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
-                return new ApiResponse(domicilioDTO, statusCode: 200);
+                return new ApiResponse(domicilioDTO, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.IsError = true;
-                apiResponse.Message = "Ocurrió un error interno.";
-                apiResponse.StatusCode = 500;
-
-                return apiResponse;
+                throw new ApiException(e);
             }
+
         }
 
 
@@ -363,37 +367,29 @@ namespace API_Ecommerce.Controllers
                 string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
                 if (user == null || user == "")
                 {
-                    apiResponse.IsError = true;
-                    apiResponse.Message = "Email vacío, no se puede encontrar el usuario";
-                    apiResponse.StatusCode = 400;
-                    return apiResponse;
+                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "Los campos son incorrectos");
                 }
 
-                try
+
+                List<PedidoDTO> pedidos = await _serviceUsuario.GetPedidos(user);
+          
+                if (pedidos == null)
                 {
-                    List<PedidoDTO> pedidos = await _serviceUsuario.GetPedidos(user);
-                    return new ApiResponse(pedidos, statusCode: 200);
-
-                }
-                catch (Exception e)
-                {
-                    apiResponse.IsError = true;
-                    apiResponse.Message = e.Message;
-                    apiResponse.StatusCode = 400;
-                    return apiResponse;
+                    throw new ApiException("No se encontraron pedidos", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
+                return new ApiResponse(pedidos, (int)HttpStatusCode.OK);
 
-
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                apiResponse.IsError = true;
-                apiResponse.Message = e.Message;
-                apiResponse.StatusCode = 500;
-                return apiResponse;
-
+                throw new ApiException(e);
             }
+
         }
 
         [HttpGet]
@@ -411,6 +407,12 @@ namespace API_Ecommerce.Controllers
 
 
                 byte[] pdfBytes = await _serviceUsuario.CrearPDF(idPedido);
+
+                if(pdfBytes == null)
+                {
+                    throw new ApiException("No se pudo generar la factura", (int)HttpStatusCode.BadRequest, "");
+                }
+
                 return File(pdfBytes, "application/pdf", "Factura.pdf");
 
             }
@@ -418,10 +420,9 @@ namespace API_Ecommerce.Controllers
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
-                throw;
+                throw new ApiException(e);
             }
 
         }

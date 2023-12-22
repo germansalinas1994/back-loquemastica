@@ -7,6 +7,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
 using AutoWrapper.Wrappers;
+using System.Net;
 
 
 
@@ -27,11 +28,11 @@ namespace BussinessLogic.Services
         }
 
 
-        public async Task<UsuarioDTO> CargarUsuarioAuth0(RequestCargarUsuarioDTO usuario)
+        public async Task<UsuarioDTO> CargarUsuarioAuth0(string email)
         {
             try
             {
-                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == usuario.Email)).FirstOrDefault();
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == email)).FirstOrDefault();
 
                 //si encuentra el usuario es que ya esta cargado sino lo cargo
 
@@ -42,7 +43,7 @@ namespace BussinessLogic.Services
                 else
                 {
                     Usuario nuevoUsuario = new Usuario();
-                    nuevoUsuario.Email = usuario.Email;
+                    nuevoUsuario.Email = email;
                     nuevoUsuario.FechaAlta = DateTime.Now;
                     nuevoUsuario.FechaModificacion = DateTime.Now;
 
@@ -56,10 +57,6 @@ namespace BussinessLogic.Services
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
         }
@@ -77,15 +74,15 @@ namespace BussinessLogic.Services
                 }
                 else
                 {
-                    return null;
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
         }
@@ -111,17 +108,18 @@ namespace BussinessLogic.Services
                 }
                 else
                 {
-                    return null;
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
+           
         }
 
         public async Task<IList<DomicilioDTO>> GetDomicilios(string email)
@@ -141,16 +139,16 @@ namespace BussinessLogic.Services
                 }
                 else
                 {
-                    throw new Exception("No se encontro el usuario");
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
 
             }
+            catch(ApiException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
         }
@@ -165,7 +163,7 @@ namespace BussinessLogic.Services
                 {
                     Domicilio nuevoDomicilio = new Domicilio();
                     nuevoDomicilio.IdUsuario = findUsuario.IdUsuario;
-                    nuevoDomicilio.Altura = domicilio.Altura;
+                    nuevoDomicilio.Altura = int.Parse(domicilio.Altura);
                     nuevoDomicilio.Calle = domicilio.Calle;
                     nuevoDomicilio.Departamento = domicilio.Departamento;
                     nuevoDomicilio.CodigoPostal = domicilio.CodigoPostal;
@@ -180,15 +178,15 @@ namespace BussinessLogic.Services
                 }
                 else
                 {
-                    throw new Exception("No se encontro el usuario");
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
         }
@@ -249,22 +247,22 @@ namespace BussinessLogic.Services
                     }
                     else
                     {
-                        throw new Exception("No se encontro el domicilio");
+                        throw new ApiException("No se encontro el domicilio", (int)HttpStatusCode.NotFound, "No se encontro el domicilio");
                     }
                 }
                 else
                 {
-                    throw new Exception("No se encontro el usuario");
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException){
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
-                throw ex;
+               throw ex;
             }
+          
         }
 
         public async Task<DomicilioDTO> EditarDomicilio(DomicilioDTO domicilio, string user)
@@ -279,7 +277,7 @@ namespace BussinessLogic.Services
 
                     if (findDomicilio != null)
                     {
-                        findDomicilio.Altura = domicilio.Altura;
+                        findDomicilio.Altura = int.Parse(domicilio.Altura);
                         findDomicilio.Calle = domicilio.Calle;
                         findDomicilio.Departamento = domicilio.Departamento;
                         findDomicilio.CodigoPostal = domicilio.CodigoPostal;
@@ -293,22 +291,22 @@ namespace BussinessLogic.Services
                     }
                     else
                     {
-                        throw new Exception("No se encontro el domicilio");
+                        throw new ApiException("No se encontro el domicilio", (int)HttpStatusCode.NotFound, "No se encontro el domicilio");
                     }
                 }
                 else
                 {
-                    throw new Exception("No se encontro el usuario");
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException){
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw ex;
             }
+           
         }
 
         public async Task<List<PedidoDTO>> GetPedidos(string? user)
@@ -341,25 +339,25 @@ namespace BussinessLogic.Services
                 }
                 else
                 {
-                    throw new Exception("No se encontro el usuario");
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
+            }
+            catch(ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+           
         }
 
         public async Task<byte[]> CrearPDF(int idPedido)
         {
             try
             {
-                //busco el pedido para ese usuario y con ese id
-                // Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.Email == user)).FirstOrDefault();
-                // if(findUsuario == null)
-                // {
-                //     throw new ApiException("No se encontro el usuario", 404, "No se encontro el usuario");
-                // }
+         
 
                 Pedido findPedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteriaIncludingSpecificRelations(x => x.Id == idPedido,
                      query => query.Include(p => p.Pago)
@@ -376,8 +374,8 @@ namespace BussinessLogic.Services
                                     .ThenInclude(e => e.Domicilio)
                                     .Include(p => p.Usuario)
                      )).FirstOrDefault();
-                
-                if(findPedido == null)
+
+                if (findPedido == null)
                 {
                     throw new ApiException("No se encontro el pedido", 404, "No se encontro el pedido");
                 }
@@ -387,7 +385,8 @@ namespace BussinessLogic.Services
                 //creo el pdf
                 return await _serviceReporte.CrearPDF(pedido);
             }
-            catch(ApiException e){
+            catch (ApiException e)
+            {
                 throw e;
             }
             catch (Exception ex)
