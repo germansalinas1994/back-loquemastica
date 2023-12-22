@@ -8,7 +8,7 @@ namespace BussinessLogic.DTO
 
         public int IdDomicilio { get; set; }
 
-        public int? Altura { get; set; }
+        public string Altura { get; set; }
 
         public string? Calle { get; set; }
 
