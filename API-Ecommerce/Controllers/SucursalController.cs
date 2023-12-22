@@ -41,6 +41,22 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("/sucursales/{id}")]
+
+        public async Task<ApiResponse> EliminarSucursal(int id)
+        {
+            await _serviceSucursal.EliminarSucursal(id);
+            ApiResponse response = new ApiResponse("la sucursal se elimino correctamente");
+            return response;
+            
+        }
+
+
+
+
+
+
 
 
 

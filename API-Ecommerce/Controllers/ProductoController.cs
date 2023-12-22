@@ -49,7 +49,7 @@ namespace API_Ecommerce.Controllers
         }
 
         [HttpPut]
-        [Route("/pid/{id}")]
+        [Route("/producto/{id}")]
 
         public async Task<ApiResponse> EliminarProducto(int id)
         {
@@ -58,9 +58,49 @@ namespace API_Ecommerce.Controllers
             return response;
         }
 
+        [HttpGet]
+        [Route("/producto/{id}")]
+
+        public async Task<ApiResponse> GetProductoById(int id)
+        {
+            try
+            {
+                ProductoDTO producto = await _service.GetProductoById(id);
+                ApiResponse response = new ApiResponse(new { data = producto });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                throw new ApiException(ex);
+            }
+        }
+
+        //Metodo para cargar productos
+        [HttpPost]
+        [Route("/producto")]
+        public async Task<ApiResponse> CargarProducto([FromBody] ProductoDTO producto)
+        {
+                await _service.CargarProducto(producto);
+                ApiResponse response = new ApiResponse("El producto se cargó exitosamente");
+                return response;
+        }
+
+        [HttpPut]
+        [Route("/productos")]
+        public async Task<ApiResponse> EditarPID([FromBody] ProductoDTO producto)
+        {
+            await _service.EditarProducto(producto);
+            ApiResponse response = new ApiResponse("El Producto se modificó exitosamente");
+            return response;
+        }
 
 
 
     }
 }
+
 
