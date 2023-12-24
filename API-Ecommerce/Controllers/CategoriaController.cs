@@ -12,7 +12,7 @@ using AutoWrapper.Wrappers;
 namespace API_Ecommerce.Controllers
 {
     [Route("api/[controller]")]
-    public class CategoriaController : Controller
+    public class CategoriaController : GenericController
     {
 
         //Instancio el service que vamos a usar

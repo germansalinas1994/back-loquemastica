@@ -16,7 +16,7 @@ using System.Net;
 namespace API_Ecommerce.Controllers
 {
     [Route("api/[controller]")]
-    public class UsuarioController : Controller
+    public class UsuarioController : GenericController
     {
 
         //Instancio el service que vamos a usar
@@ -38,15 +38,8 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-                if (user == null || user == "")
-                {
-                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
-                }
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
                 UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(user);
 
@@ -75,19 +68,11 @@ namespace API_Ecommerce.Controllers
 
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string email = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-                if (email == null || email == "")
-                {
-                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
-                }
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
 
-
-                UsuarioDTO usuarioDTO = await _serviceUsuario.GetUsuario(email);
+                UsuarioDTO usuarioDTO = await _serviceUsuario.GetUsuario(user);
                 return new ApiResponse(new { data = usuarioDTO });
 
             }
@@ -111,18 +96,9 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string email = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
-
-
-
-                if (string.IsNullOrEmpty(email))
-                {
-                    throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
-                }
                 if (usuario == null)
                 {
                     throw new ApiException("No se pudo actualizar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
@@ -156,24 +132,10 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
-                }
-
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
                 List<DomicilioDTO> domicilios = (await _serviceUsuario.GetDomicilios(user)).ToList();
-
-
-                if (domicilios.Count == 0)
-                {
-                    return new ApiResponse(domicilios, (int)HttpStatusCode.NoContent);
-                }
 
                 return new ApiResponse(domicilios, (int)HttpStatusCode.OK);
             }
@@ -195,17 +157,10 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
-                }
-
-                if (domicilio == null)
+                if (domicilio == null || domicilio.IdDomicilio != 0)
                 {
                     throw new ApiException("No se pudo agregar el domicilio", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
@@ -238,15 +193,8 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
-                }
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
                 DomicilioDTO domicilioDTO = await _serviceUsuario.EliminarDomicilio(idDomicilio, user);
 
@@ -255,7 +203,7 @@ namespace API_Ecommerce.Controllers
                     throw new ApiException("No se encontró el domicilio", (int)HttpStatusCode.BadRequest, "");
                 }
 
-                return new ApiResponse("Se eliminó correctamente", (int)HttpStatusCode.NoContent);
+                return new ApiResponse("Se eliminó correctamente", (int)HttpStatusCode.OK);
             }
             catch (ApiException)
             {
@@ -274,15 +222,9 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
-                }
                 if (idDomicilio == 0 || idDomicilio == null)
                 {
                     throw new ApiException("No se pudo encontrar el domicilio", (int)HttpStatusCode.BadRequest, "");
@@ -315,15 +257,9 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
 
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "No tiene acceso");
-                }
                 if (domicilio.IdDomicilio == 0 || domicilio.IdDomicilio == null)
                 {
                     throw new ApiException("No se pudo editar el domicilio", (int)HttpStatusCode.BadRequest, "");
@@ -359,14 +295,9 @@ namespace API_Ecommerce.Controllers
 
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-                if (user == null || user == "")
-                {
-                    throw new ApiException("No tiene acceso", (int)HttpStatusCode.Unauthorized, "Los campos son incorrectos");
-                }
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
+
 
 
                 List<PedidoDTO> pedidos = await _serviceUsuario.GetPedidos(user);

@@ -19,7 +19,7 @@ using Google.Protobuf.WellKnownTypes;
 namespace API_Ecommerce.Controllers
 {
     [Route("api/[controller]")]
-    public class MercadoPagoController : Controller
+    public class MercadoPagoController : GenericController
     {
 
         //Instancio el service que vamos a usar
@@ -38,49 +38,50 @@ namespace API_Ecommerce.Controllers
         }
 
 
-        [Authorize(Policy = "Cliente")]
         [HttpPost]
+        [Authorize(Policy = "Cliente")]
         [Route("/publicacionesCarritoMP")]
         // public async Task<ApiResponse> GetPreferenceMP([FromBody] List<SearchPublicacionCarritoDTO> publicacionCarrito)
         public async Task<ApiResponse> GetPreferenceMP([FromBody] PreferenceMercadoPagoDTO preferencePago)
         {
-            //obtengo el usuario logueado desde el token
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(token);
-            string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-            //verifico que el usuario sea el mismo que tengo en la base 
-            UsuarioDTO usuario = await _serviceUsuario.GetUsuario(user);
-
-            if (usuario == null)
-            {
-                return new ApiResponse("Usuario no encontrado");
-            }
-
 
             try
             {
+                //metodo que obtiene el email del usuario desde el token
+                string user = UserEmailFromJWT();
+
+
                 if (preferencePago.Publicaciones == null || preferencePago.Publicaciones.Count == 0)
                 {
-                    return new ApiResponse("Carrito vacío");
+                    throw new ApiException("No se encontraron publicaciones en el carrito");
                 }
+
+                //verifico que el usuario sea el mismo que tengo en la base 
+                UsuarioDTO usuario = await _serviceUsuario.GetUsuario(user);
+
+                if (usuario == null)
+                {
+                    throw new ApiException("El usuario no existe");
+                }
+
                 List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(preferencePago.Publicaciones)).ToList();
 
-                string prefenceId = await _service.GetPreferenceMP(publicaciones, usuario.IdUsuario, preferencePago.IdDomicilio);
+                // string prefenceId = await _service.GetPreferenceMP(publicaciones, usuario.IdUsuario, preferencePago.IdDomicilio);
+                string prefenceId = await _service.GetPreferenceMP(preferencePago, user);
 
                 ApiResponse response = new ApiResponse(new { data = prefenceId });
 
                 return response;
             }
+            catch (ApiException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw new ApiException(ex);
             }
+
 
         }
 
@@ -93,8 +94,7 @@ namespace API_Ecommerce.Controllers
             {
                 if (payment == null)
                 {
-                    Console.WriteLine("Notificación de webhook inválida.");
-                    return new ApiResponse(500);
+                    throw new ApiException("No se recibió el pago");
                 }
 
                 // Confirmar recepción inmediatamente
@@ -109,13 +109,16 @@ namespace API_Ecommerce.Controllers
 
                 }
 
-                return new ApiResponse(200);
+                return new ApiResponse((int)HttpStatusCode.OK);
 
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex); // Log the exception
-                return new ApiResponse(500);
+                throw new ApiException(ex);
             }
 
         }
@@ -127,44 +130,27 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-                ApiResponse response = new ApiResponse();
 
                 if (merchantOrderId == null || paymentId == null)
                 {
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response.Message = "Faltan datos";
-                    response.IsError = true;
-                    return response;
+                    throw new ApiException("No se recibió el pago");
                 }
 
-                try
-                {
-                    PedidoDTO pago = await _service.GetOrderMercadoPago(merchantOrderId, paymentId);
-                    response.StatusCode = (int)HttpStatusCode.OK;
-                    response.Message = "OK";
-                    response.Result = pago;
-                    return response;
+                PedidoDTO pago = await _service.GetOrderMercadoPago(merchantOrderId, paymentId);
 
-                }
-                catch (Exception ex)
-                {
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response.Message = ex.Message;
-                    response.IsError = true;
-                    return response;
-                }
+                return new ApiResponse(pago);
 
 
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw new ApiException(ex);
-
             }
+
 
         }
 

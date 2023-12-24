@@ -19,6 +19,7 @@ using MercadoPago.Resource.Payment;
 using MercadoPago.Client;
 using MercadoPago.Client.MerchantOrder;
 using MercadoPago.Resource.MerchantOrder;
+using AutoWrapper.Wrappers;
 // Agrega credenciales
 
 namespace BussinessLogic.Services
@@ -31,105 +32,139 @@ namespace BussinessLogic.Services
         private readonly MercadoPagoDevSettings _mercadoPagoSettings;
         private ServiceUsuario _serviceUsuario;
         private ServiceMail _serviceMail;
+        private ServicePublicacion _servicePublicacion;
 
         private readonly IUnitOfWork _unitOfWork;
 
         //inyecto el settings por el constructor, para poder usar las credenciales de mercado pago
-        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork, ServiceUsuario serviceUsuario, ServiceMail serviceMail)
+        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork, ServiceUsuario serviceUsuario, ServiceMail serviceMail, ServicePublicacion servicePublicacion)
         {
             _mercadoPagoSettings = mercadoPagoSettingsOptions.Value;
             _unitOfWork = unitOfWork;
             _serviceUsuario = serviceUsuario;
             _serviceMail = serviceMail;
+            _servicePublicacion = servicePublicacion;
         }
 
 
         //implementacion mercado pago 
 
-        public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones, int idUsuario, int idDomicilio)
+        // public async Task<string> GetPreferenceMP(List<PublicacionDTO> publicaciones, int idUsuario, int idDomicilio)
+        public async Task<string> GetPreferenceMP(PreferenceMercadoPagoDTO preferencePago, string user)
         {
 
-
-            //las credenciales que puse son de prueba, hay que cambiarlas por las de produccion, estas las cree en la cuenta del vendedor de prueba
-            MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
-
-            // Crea el objeto de request de la preference
-
-            //si el id del domicilio es 0, es porque es un retiro en sucursal, entonces no tengo que agregar el domicilio
-
-
-            var request = new PreferenceRequest
+            try
             {
-                Items = new List<PreferenceItemRequest>(),
-                Purpose = "wallet_purchase",
-                Expires = true,
-                ExpirationDateFrom = DateTime.Now,
-                ExpirationDateTo = DateTime.Now.AddDays(1),
+                //busco el usuario por el email
+                int idUsuario = (await _serviceUsuario.GetUsuario(user)).IdUsuario;
 
-            };
-
-            if (idDomicilio != 0)
-            {
-                Domicilio domicilio = await _unitOfWork.GenericRepository<Domicilio>().GetById(idDomicilio);
-
-                if (domicilio != null)
+                if (idUsuario == 0)
                 {
-
-                    //agrego el domicilio a la preferencia
-                    request.Shipments = new PreferenceShipmentsRequest
-                    {
-                        ReceiverAddress = new PreferenceReceiverAddressRequest
-                        {
-                            StreetName = domicilio.IdDomicilio.ToString(),
-
-                        }
-                    };
-
+                    throw new ApiException("El usuario no existe");
                 }
-            }
 
-            request.Metadata = new Dictionary<string, object>
+
+                //busco las publicaciones 
+                List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(preferencePago.Publicaciones)).ToList();
+
+                if (publicaciones == null || publicaciones.Count == 0)
+                {
+                    throw new ApiException("No se encontraron publicaciones en el carrito");
+                }
+
+
+
+
+
+                //las credenciales que puse son de prueba, hay que cambiarlas por las de produccion, estas las cree en la cuenta del vendedor de prueba
+                MercadoPagoConfig.AccessToken = _mercadoPagoSettings.AccessToken;
+
+                // Crea el objeto de request de la preference
+
+                //si el id del domicilio es 0, es porque es un retiro en sucursal
+                int idDomicilio = 0;
+
+                var request = new PreferenceRequest
+                {
+                    Items = new List<PreferenceItemRequest>(),
+                    Purpose = "wallet_purchase",
+                    Expires = true,
+                    ExpirationDateFrom = DateTime.Now,
+                    ExpirationDateTo = DateTime.Now.AddDays(1),
+
+                };
+
+                if (preferencePago.IdDomicilio != 0)
+                {
+                    Domicilio domicilio = await _unitOfWork.GenericRepository<Domicilio>().GetById(preferencePago.IdDomicilio);
+
+                    if (domicilio != null)
+                    {
+                        idDomicilio = domicilio.IdDomicilio;
+                        //agrego el domicilio a la preferencia
+                        request.Shipments = new PreferenceShipmentsRequest
+                        {
+                            ReceiverAddress = new PreferenceReceiverAddressRequest
+                            {
+                                StreetName = domicilio.IdDomicilio.ToString(),
+
+                            }
+                        };
+
+                    }
+                }
+
+                request.Metadata = new Dictionary<string, object>
                 {
                     {"idUsuario", idUsuario.ToString() },
                     {"idDomicilio", idDomicilio.ToString() }
                 };
 
 
-
-
-            request.BackUrls = new PreferenceBackUrlsRequest
-            {
-                Success = _mercadoPagoSettings.SuccessUrl,
-                Failure = _mercadoPagoSettings.FailureUrl,
-                Pending = _mercadoPagoSettings.PendingUrl
-            };
-            request.NotificationUrl = _mercadoPagoSettings.NotificationUrl;
-
-            request.AutoReturn = "approved";
-
-            // Itera sobre las publicaciones y crea un ítem para cada una
-            foreach (var publicacion in publicaciones)
-            {
-                var item = new PreferenceItemRequest
+                request.BackUrls = new PreferenceBackUrlsRequest
                 {
-                    Id = publicacion.IdPublicacion.ToString(),
-                    Description = publicacion.IdProductoNavigation.Descripcion,
-                    PictureUrl = publicacion.IdProductoNavigation.UrlImagen,
-                    Title = publicacion.IdProductoNavigation.Nombre,    // Debes proporcionar el título de la publicación aquí
-                    Quantity = publicacion.Cantidad,
-                    CurrencyId = "ARS",
-                    UnitPrice = (decimal?)publicacion.IdProductoNavigation.Precio,  // Debes proporcionar el precio de la publicación aquí
+                    Success = _mercadoPagoSettings.SuccessUrl,
+                    Failure = _mercadoPagoSettings.FailureUrl,
+                    Pending = _mercadoPagoSettings.PendingUrl
                 };
+                request.NotificationUrl = _mercadoPagoSettings.NotificationUrl;
+
+                request.AutoReturn = "approved";
+
+                // Itera sobre las publicaciones y crea un ítem para cada una
+                foreach (var publicacion in publicaciones)
+                {
+                    var item = new PreferenceItemRequest
+                    {
+                        Id = publicacion.IdPublicacion.ToString(),
+                        Description = publicacion.IdProductoNavigation.Descripcion,
+                        PictureUrl = publicacion.IdProductoNavigation.UrlImagen,
+                        Title = publicacion.IdProductoNavigation.Nombre,    // Debes proporcionar el título de la publicación aquí
+                        Quantity = publicacion.Cantidad,
+                        CurrencyId = "ARS",
+                        UnitPrice = (decimal?)publicacion.IdProductoNavigation.Precio,  // Debes proporcionar el precio de la publicación aquí
+                    };
 
 
 
-                request.Items.Add(item);
+                    request.Items.Add(item);
+                }
+                // Crea la preferencia usando el client
+                var client = new PreferenceClient();
+                Preference preference = await client.CreateAsync(request);
+
+                return preference.InitPoint;
+
             }
-            // Crea la preferencia usando el client
-            var client = new PreferenceClient();
-            Preference preference = await client.CreateAsync(request);
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
 
-            return preference.InitPoint;
 
         }
 
@@ -329,24 +364,36 @@ namespace BussinessLogic.Services
         public async Task<PedidoDTO> GetOrderMercadoPago(string merchantOrderId, string paymentId)
         {
             //busco el pago en la base de datos por el id del pago
-            long idPago = long.Parse(paymentId);
-            long idOrden = long.Parse(merchantOrderId);
-
-            Pedido pedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteria(x => x.Orden_MercadoPago == idOrden)).FirstOrDefault();
-
-            if (pedido == null)
+            try
             {
-                throw new Exception("No se encontro el pedido");
+                long idPago = long.Parse(paymentId);
+                long idOrden = long.Parse(merchantOrderId);
+
+                Pedido pedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteria(x => x.Orden_MercadoPago == idOrden)).FirstOrDefault();
+
+                if (pedido == null)
+                {
+                    throw new ApiException("No se encontro el pedido");
+                }
+
+                Pago pago = (await _unitOfWork.GenericRepository<Pago>().GetByCriteria(x => x.IdPagoMercadoPago == idPago)).FirstOrDefault();
+
+                if (pago == null)
+                {
+                    throw new ApiException("No se encontro el pago");
+                }
+
+                return pedido.Adapt<PedidoDTO>();
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
             }
 
-            Pago pago = (await _unitOfWork.GenericRepository<Pago>().GetByCriteria(x => x.IdPagoMercadoPago == idPago)).FirstOrDefault();
-
-            if (pago == null)
-            {
-                throw new Exception("No se encontro el pago");
-            }
-
-            return pedido.Adapt<PedidoDTO>();
 
 
         }

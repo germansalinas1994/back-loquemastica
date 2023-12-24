@@ -13,7 +13,7 @@ using AutoWrapper.Wrappers;
 namespace API_Ecommerce.Controllers
 {
     [Route("api/[controller]")]
-    public class SucursalController : Controller
+    public class SucursalController : GenericController
     {
 
         //Instancio el service que vamos a usar
@@ -33,12 +33,18 @@ namespace API_Ecommerce.Controllers
             try
             {
                 List<SucursalDTO> sucursales = await _serviceSucursal.GetSucursales();
-                return new ApiResponse(sucursales, 200);
+                return new ApiResponse(sucursales);
             }
-            catch (Exception e)
+            catch(ApiException)
             {
-                return new ApiResponse(e.Message, 400);
+                throw;
             }
+            catch(Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+          
+          
         }
 
         [HttpPut]
