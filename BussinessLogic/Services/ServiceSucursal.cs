@@ -6,6 +6,7 @@ using DataAccess.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
+using MercadoPago.Resource.User;
 
 namespace BussinessLogic.Services
 {
@@ -48,6 +49,21 @@ namespace BussinessLogic.Services
 
             return true;
 
+
+        }
+
+        public async Task<SucursalDTO> GetSucursalEmail(string user)
+        {
+
+            try
+            {
+                Sucursal sucursal = _unitOfWork.GenericRepository<Sucursal>().GetAll().Result.Where(s => s.EmailSucursal == user).FirstOrDefault();
+                return sucursal.Adapt<SucursalDTO>();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }                                                                                         
 
         }
     }

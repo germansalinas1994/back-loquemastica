@@ -19,10 +19,13 @@ namespace BussinessLogic.Services
         //Instancio el UnitOfWork que vamos a usar
         private readonly IUnitOfWork _unitOfWork;
 
+        private readonly ServiceSucursal _serviceSucursal;
+
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServicePublicacion(IUnitOfWork unitOfWork)
+        public ServicePublicacion(IUnitOfWork unitOfWork, ServiceSucursal serviceSucursal)
         {
             _unitOfWork = unitOfWork;
+            _serviceSucursal = serviceSucursal;
         }
 
         public async Task<IList<PublicacionDTO>> GetAllPublicaciones()
@@ -95,6 +98,28 @@ namespace BussinessLogic.Services
             {
                 throw ex;
             }
+
+
+        }
+
+        public async Task<IList<PublicacionDTO>> GetPublicacionesRolSucursal(string user)
+        {
+            SucursalDTO sucursal = await _serviceSucursal.GetSucursalEmail(user);
+
+            if (sucursal == null)
+            {
+                throw new ApiException("No se encontró la sucursal");
+            }
+
+            IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
+                .GetByCriteriaIncludingSpecificRelations(
+                    x => x.IdSucursal == sucursal.IdSucursal, // Tu criterio
+
+                    query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
+                                  .ThenInclude(producto => producto.IdCategoriaNavigation)
+                );
+                
+            return publicaciones.Adapt<IList<PublicacionDTO>>();
 
 
         }

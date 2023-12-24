@@ -12,18 +12,21 @@ namespace BussinessLogic.Services
     {
         //Instancio el UnitOfWork que vamos a usar
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ServiceSucursal _serviceSucursal;
 
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceProducto(IUnitOfWork unitOfWork)
+        public ServiceProducto(IUnitOfWork unitOfWork )
         {
             _unitOfWork = unitOfWork;
+            _serviceSucursal = new ServiceSucursal(_unitOfWork);
         }
+
 
         public async Task<IList<ProductoDTO>> GetAllProductos()
         {
             try
             {
-                IList<Producto> productos = (await _unitOfWork.ProductoRepository.GetProductoCategoria()).Where(p => p.FechaBaja == null).ToList().OrderByDescending(x => x.FechaAlta).ToList();
+                IList<Producto> productos = (await _unitOfWork.ProductoRepository.GetProductoCategoria()).Where(p => p.FechaBaja == null).ToList().OrderByDescending(x => x.IdProducto).ToList();
                 IList<ProductoDTO> productoDTO = productos.Adapt<IList<ProductoDTO>>();
 
                 return productoDTO;
@@ -61,17 +64,44 @@ namespace BussinessLogic.Services
 
         public async Task<int> CargarProducto(ProductoDTO producto)
         {
-           Producto nuevoProducto = new Producto();
-            nuevoProducto.FechaAlta = DateTime.Now;
-            nuevoProducto.FechaModificacion = DateTime.Now;
-            nuevoProducto.Descripcion = producto.Descripcion;
-            nuevoProducto.Nombre = producto.Nombre;
-            nuevoProducto.Precio = producto.Precio.Adapt<float>();
-            nuevoProducto.IdCategoria = producto.idCategoria;
-            nuevoProducto.UrlImagen = producto.UrlImagen;
-            Producto productoCargado = await _unitOfWork.GenericRepository<Producto>().Insert(nuevoProducto);
 
-            return 0;
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                Producto nuevoProducto = new Producto();
+                nuevoProducto.FechaAlta = DateTime.Now;
+                nuevoProducto.FechaModificacion = DateTime.Now;
+                nuevoProducto.Descripcion = producto.Descripcion;
+                nuevoProducto.Nombre = producto.Nombre;
+                nuevoProducto.Precio = (float)producto.Precio;
+                nuevoProducto.IdCategoria = producto.idCategoria;
+                nuevoProducto.UrlImagen = producto.UrlImagen;
+                Producto productoCargado = await _unitOfWork.GenericRepository<Producto>().Insert(nuevoProducto);
+
+                IList<SucursalDTO> sucursales = (await _serviceSucursal.GetSucursales()).ToList();
+
+                foreach ( var sucursal in sucursales)
+                {
+                    Publicacion publicacion = new Publicacion();
+                    publicacion.IdProducto = productoCargado.IdProducto;
+                    publicacion.IdSucursal = sucursal.IdSucursal;
+                    publicacion.Stock = 0;
+                    Publicacion publicacionCargado = await _unitOfWork.GenericRepository<Publicacion>().Insert(publicacion);
+                }
+
+
+                await _unitOfWork.CommitAsync();
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                // Maneja la excepción y realiza un rollback en caso de error
+                await _unitOfWork.RollbackAsync();
+                throw ex;
+            }
+
 
         }
 
@@ -81,21 +111,26 @@ namespace BussinessLogic.Services
             {
                 Producto productoBase = await _unitOfWork.GenericRepository<Producto>().GetById(producto.IdProducto);
 
-                if (productoBase != null){
-                productoBase.Nombre = producto.Nombre;
-                productoBase.Descripcion = producto.Descripcion;
-                productoBase.Precio = producto.Precio.Adapt<float>();
-                productoBase.IdCategoria = producto.idCategoria;
-                productoBase.UrlImagen = producto.UrlImagen;
-                productoBase.FechaModificacion = DateTime.Now;}
+                if (productoBase != null)
+                {
+                    productoBase.Nombre = producto.Nombre;
+                    productoBase.Descripcion = producto.Descripcion;
+                    productoBase.Precio = producto.Precio.Adapt<float>();
+                    productoBase.IdCategoria = producto.idCategoria;
+                    productoBase.UrlImagen = producto.UrlImagen;
+                    productoBase.FechaModificacion = DateTime.Now;
+                }
 
                 Producto productoActualizado = await _unitOfWork.GenericRepository<Producto>().Update(productoBase);
 
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw ex;
             }
             return 0;
 
-    }}}
+        }
+    }
+}
