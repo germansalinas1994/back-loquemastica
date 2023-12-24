@@ -52,6 +52,9 @@ builder.Services.AddScoped<ServiceMercadoPago>();
 builder.Services.AddScoped<ServiceUsuario>();
 builder.Services.AddScoped<ServiceSucursal>();
 builder.Services.AddScoped<ServiceReporte>();
+builder.Services.AddScoped<ServiceMail>();
+
+
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
