@@ -397,7 +397,7 @@ namespace BussinessLogic.Services
             }
         }
 
-        internal async Task<string> GetEmailUsuario(int idUsuario)
+        internal async Task<Usuario> GetEmailUsuario(int idUsuario)
         {
             try
             {
@@ -405,7 +405,7 @@ namespace BussinessLogic.Services
 
                 if (findUsuario != null)
                 {
-                    return findUsuario.Email;
+                    return findUsuario;
                 }
                 else
                 {

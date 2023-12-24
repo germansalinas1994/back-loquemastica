@@ -38,13 +38,11 @@ namespace BussinessLogic.Services
 
             using var smtp = new SmtpClient();
             await smtp.ConnectAsync(_mailSettings.SmtpServer, _mailSettings.SmtpPort, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_mailSettings.SmtpUsername, _mailSettings.SmtpPassword);
+            // Cambio realizado aquí para usar la contraseña de aplicación
+            await smtp.AuthenticateAsync(_mailSettings.SmtpUsername, _mailSettings.SmtpPasswordFactores);
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
         }
-
-
-
 
     }
 }

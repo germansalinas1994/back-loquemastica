@@ -159,7 +159,7 @@ namespace API_Ecommerce.Controllers
                 var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;                
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
 
                 if (user == null || user == "")
                 {
@@ -370,7 +370,7 @@ namespace API_Ecommerce.Controllers
 
 
                 List<PedidoDTO> pedidos = await _serviceUsuario.GetPedidos(user);
-          
+
                 if (pedidos == null)
                 {
                     throw new ApiException("No se encontraron pedidos", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
@@ -390,29 +390,29 @@ namespace API_Ecommerce.Controllers
 
         }
 
+
+
         [HttpGet]
         [Authorize(Policy = "Cliente")]
         [Route("/generarFactura/{idPedido}")]
-
-        public async Task<IActionResult> GenerarFacturaPedido(int idPedido)
+        public async Task<ApiResponse> GenerarFacturaPedido(int idPedido)
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
-
-
                 byte[] pdfBytes = await _serviceUsuario.CrearPDF(idPedido);
 
-                if(pdfBytes == null)
+                if (pdfBytes == null)
                 {
-                    throw new ApiException("No se pudo generar la factura", (int)HttpStatusCode.BadRequest, "");
+                    throw new ApiException("No se pudo generar la factura", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
                 }
 
-                return File(pdfBytes, "application/pdf", "Factura.pdf");
+                // Convertir el PDF a Base64
+                string pdfBase64 = Convert.ToBase64String(pdfBytes);
 
+                // Devolver la cadena Base64 como parte de la respuesta
+                return new ApiResponse(new { pdf = pdfBase64 }, (int)HttpStatusCode.OK);
+
+                // return Ok(new { pdf = pdfBase64 });
             }
             catch (ApiException)
             {

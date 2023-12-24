@@ -14,6 +14,8 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using AutoWrapper;
+using BussinessLogic.DTO.Email;
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,13 +28,40 @@ builder.Services.AddControllers();
 QuestPDF.Settings.License = LicenseType.Community;
 //agrego la inyeccion de dependencia de mercado pago, para poder usar el servicio que cree
 builder.Services.Configure<MercadoPagoDevSettings>(builder.Configuration.GetSection("MercadoPagoDev"));
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-// builder.
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mi API", Version = "v1" });
+
+    // Configurar Swagger para usar Authorization
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingrese 'Bearer' [espacio] y luego su token en el campo de texto. Ejemplo: 'Bearer 12345abcdef'",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});// builder.
 
 // ADD Entity framework con mysql
 
@@ -52,6 +81,7 @@ builder.Services.AddScoped<ServiceMercadoPago>();
 builder.Services.AddScoped<ServiceUsuario>();
 builder.Services.AddScoped<ServiceSucursal>();
 builder.Services.AddScoped<ServiceReporte>();
+builder.Services.AddScoped<ServiceMail>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -158,6 +188,10 @@ app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions {
     // Aquí puedes personalizar las opciones como prefieras
     IsDebug = app.Environment.IsDevelopment()
 });
+
+
+
+
 //habilito los cors
 
 app.UseCors("politica");

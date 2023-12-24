@@ -41,14 +41,15 @@ namespace API_Ecommerce.Controllers
                 ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
                 return response;
             }
-            catch (Exception ex)
+            catch (ApiException)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
+                throw;
+            }
+            catch(Exception ex)
+            {
                 throw new ApiException(ex);
             }
+          
 
 
         }

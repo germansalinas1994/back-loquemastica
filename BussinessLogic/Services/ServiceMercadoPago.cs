@@ -274,9 +274,9 @@ namespace BussinessLogic.Services
 
                     //envio el correo con la factura
 
-                    string email = await _serviceUsuario.GetEmailUsuario(idUsuario);
+                    Usuario usuario = await _serviceUsuario.GetEmailUsuario(idUsuario);
 
-                    await EnviarCorreoConFactura(pedido.Id, email);
+                    await EnviarCorreoConFactura(pedido.Id, usuario);
 
 
                     // var facturaPdfBytes = await _serviceUsuario.CrearPDF(pedido.Id); // Asumiendo que esto devuelve el PDF como un array de bytes
@@ -351,14 +351,27 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task EnviarCorreoConFactura(int idPedido, string emailUsuario)
+        public async Task EnviarCorreoConFactura(int idPedido, Usuario usuario)
         {
             byte[] facturaPdfBytes = await _serviceUsuario.CrearPDF(idPedido); // Asume que esto te devuelve el PDF como un array de bytes
 
-            string emailBody = "<p>Gracias por su compra...</p>"; // Escribe aquí el cuerpo del correo electrónico.
+            // Crear el cuerpo del correo electrónico utilizando una plantilla HTML con la imagen incrustada
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <div style='text-align: center;'>
+            <img src='https://storage.googleapis.com/loquemasticatumascota/383349650_10234216208090669_4456284716581373004_n.jpg' alt='Logo de Lo Que Mastica Tu Mascota' width='300' />
+                            <h1>¡Tu pedido fue aprobado!</h1>
+                        </div>
+                        <p>Hola, {usuario.Nombre} {usuario.Apellido}</p>
+                        <p>Agradecemos tu compra y esperamos volver a verte pronto en nuestra Tienda Online!</p>
+                        <p>Mediante este mensaje, te acercamos la factura de tu último pedido.</p>
+                        <p>Envío automático generado por LoQueMasticaTuMascota.com. No respondas este mail.</p>
+                    </body>
+                </html>";
 
             await _serviceMail.SendEmailAsync(
-                emailUsuario,
+                usuario.Email,
                 "Su factura de Lo Que Mastica Tu Mascota",
                 emailBody,
                 facturaPdfBytes,
