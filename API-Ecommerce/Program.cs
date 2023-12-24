@@ -13,6 +13,7 @@ using QuestPDF.Infrastructure;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using AutoWrapper;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -150,8 +151,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
+app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions {
+    // Aquí puedes personalizar las opciones como prefieras
+    IsDebug = app.Environment.IsDevelopment()
+});
 //habilito los cors
 
 app.UseCors("politica");
@@ -163,6 +169,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
 
 app.Run();
 

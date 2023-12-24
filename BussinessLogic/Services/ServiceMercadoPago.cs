@@ -30,15 +30,17 @@ namespace BussinessLogic.Services
         //instancio el settings para poder usar las credenciales de mercado pago
         private readonly MercadoPagoDevSettings _mercadoPagoSettings;
         private ServiceUsuario _serviceUsuario;
+        private ServiceMail _serviceMail;
 
         private readonly IUnitOfWork _unitOfWork;
 
         //inyecto el settings por el constructor, para poder usar las credenciales de mercado pago
-        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork, ServiceUsuario serviceUsuario)
+        public ServiceMercadoPago(IOptions<MercadoPagoDevSettings> mercadoPagoSettingsOptions, IUnitOfWork unitOfWork, ServiceUsuario serviceUsuario, ServiceMail serviceMail)
         {
             _mercadoPagoSettings = mercadoPagoSettingsOptions.Value;
             _unitOfWork = unitOfWork;
             _serviceUsuario = serviceUsuario;
+            _serviceMail = serviceMail;
         }
 
 
@@ -270,10 +272,15 @@ namespace BussinessLogic.Services
 
                     await _unitOfWork.CommitAsync();
 
+                    //envio el correo con la factura
+
+                    string email = await _serviceUsuario.GetEmailUsuario(idUsuario);
+
+                    await EnviarCorreoConFactura(pedido.Id, email);
 
 
                     // var facturaPdfBytes = await _serviceUsuario.CrearPDF(pedido.Id); // Asumiendo que esto devuelve el PDF como un array de bytes
-                    
+
 
 
                 }
@@ -342,6 +349,21 @@ namespace BussinessLogic.Services
             return pedido.Adapt<PedidoDTO>();
 
 
+        }
+
+        public async Task EnviarCorreoConFactura(int idPedido, string emailUsuario)
+        {
+            byte[] facturaPdfBytes = await _serviceUsuario.CrearPDF(idPedido); // Asume que esto te devuelve el PDF como un array de bytes
+
+            string emailBody = "<p>Gracias por su compra...</p>"; // Escribe aquí el cuerpo del correo electrónico.
+
+            await _serviceMail.SendEmailAsync(
+                emailUsuario,
+                "Su factura de Lo Que Mastica Tu Mascota",
+                emailBody,
+                facturaPdfBytes,
+                "Factura.pdf"
+            );
         }
 
 

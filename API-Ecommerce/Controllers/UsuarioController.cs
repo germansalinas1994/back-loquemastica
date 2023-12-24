@@ -43,8 +43,6 @@ namespace API_Ecommerce.Controllers
                 var jwtToken = tokenHandler.ReadJwtToken(token);
                 string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
 
-
-
                 if (user == null || user == "")
                 {
                     throw new ApiException("Email vacío, no se puede encontrar el usuario", (int)HttpStatusCode.BadRequest, "Los campos son incorrectos");
@@ -161,7 +159,7 @@ namespace API_Ecommerce.Controllers
                 var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;                
 
                 if (user == null || user == "")
                 {
