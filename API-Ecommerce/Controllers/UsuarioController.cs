@@ -41,11 +41,10 @@ namespace API_Ecommerce.Controllers
                 //metodo que obtiene el email del usuario desde el token
                 string user = UserEmailFromJWT();
 
-                UsuarioDTO usuarioDTO = await _serviceUsuario.CargarUsuarioAuth0(user);
+                string respuesta =  await _serviceUsuario.CargarUsuarioAuth0(user);
 
-                ApiResponse response = new ApiResponse(new { data = "Se ha cargado el usuario correctamente" });
+                return new ApiResponse(respuesta, (int)HttpStatusCode.OK);
 
-                return response;
             }
             catch (ApiException)
             {

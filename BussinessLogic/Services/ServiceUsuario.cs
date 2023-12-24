@@ -28,7 +28,7 @@ namespace BussinessLogic.Services
         }
 
 
-        public async Task<UsuarioDTO> CargarUsuarioAuth0(string email)
+        public async Task<string> CargarUsuarioAuth0(string email)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace BussinessLogic.Services
 
                 if (findUsuario != null)
                 {
-                    return findUsuario.Adapt<UsuarioDTO>();
+                    return "El usuario ya esta cargado";
                 }
                 else
                 {
@@ -50,15 +50,19 @@ namespace BussinessLogic.Services
                     await _unitOfWork.UsuarioRepository.Insert(nuevoUsuario);
                     await _unitOfWork.CommitAsync();
 
-                    return nuevoUsuario.Adapt<UsuarioDTO>();
-
+                    return "Usuario cargado correctamente";
 
                 }
             }
-            catch (Exception ex)
+            catch(ApiException)
+            {
+                throw;
+            }
+            catch(Exception ex)
             {
                 throw ex;
             }
+           
         }
 
 
