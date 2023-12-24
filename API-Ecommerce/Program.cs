@@ -82,11 +82,6 @@ builder.Services.AddScoped<ServiceUsuario>();
 builder.Services.AddScoped<ServiceSucursal>();
 builder.Services.AddScoped<ServiceReporte>();
 builder.Services.AddScoped<ServiceMail>();
-<<<<<<< HEAD
-=======
-
-
->>>>>>> devfede
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
