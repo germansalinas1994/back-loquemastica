@@ -139,32 +139,28 @@ namespace API_Ecommerce.Controllers
             {
                 throw new ApiException(ex);
             }
-            
+
         }
 
         [HttpGet]
         [Route("/publicacionesRolSucursal")]
-        // [Authorize(Roles = "Sucursal")]
+        // [Authorize(Policy = "Sucursal")]
         public async Task<ApiResponse> GetPublicacionesRolSucursal()
         {
             try
             {
-                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                string user = UserEmailFromJWT();
 
-                // IList<PublicacionDTO> publicaciones = await _service.GetAllPublicaciones();
                 IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesRolSucursal(user);
-                ApiResponse response = new ApiResponse(new { data = publicaciones});
-                return response;
+                return new ApiResponse(new { data = publicaciones });
+            
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                }
                 throw new ApiException(ex);
             }
 

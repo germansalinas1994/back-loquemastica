@@ -52,20 +52,22 @@ namespace API_Ecommerce.Controllers
 
         public async Task<ApiResponse> EliminarSucursal(int id)
         {
-            await _serviceSucursal.EliminarSucursal(id);
-            ApiResponse response = new ApiResponse("la sucursal se elimino correctamente");
-            return response;
+            try
+            {
+                await _serviceSucursal.EliminarSucursal(id);
+                return new ApiResponse("la sucursal se elimino correctamente");
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+
             
         }
-
-
-
-
-
-
-
-
-
 
 
     }

@@ -90,7 +90,7 @@ namespace BussinessLogic.Services
                 return publicaciones.Adapt<IList<PublicacionDTO>>();
 
             }
-            catch(ApiException ex)
+            catch (ApiException ex)
             {
                 throw ex;
             }
@@ -104,22 +104,40 @@ namespace BussinessLogic.Services
 
         public async Task<IList<PublicacionDTO>> GetPublicacionesRolSucursal(string user)
         {
-            SucursalDTO sucursal = await _serviceSucursal.GetSucursalEmail(user);
 
-            if (sucursal == null)
+            try
             {
-                throw new ApiException("No se encontró la sucursal");
+                //ojo con esto, no es necesario hacer un metodo, se puede buscar la sucursal directamente con la consulta como en la linea 110 (No es necesario el DTO, el dto es para cuando la devolves)
+                SucursalDTO sucursal = await _serviceSucursal.GetSucursalEmail(user);
+
+                // Sucursal suc = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
+
+                if (sucursal == null)
+                {
+                    throw new ApiException("No se encontró la sucursal");
+                }
+
+                //esto esta bien pero, lo haria con suc.IdSucursal 
+                IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
+                    .GetByCriteriaIncludingSpecificRelations(
+                        x => x.IdSucursal == sucursal.IdSucursal, // Tu criterio
+
+                        query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
+                                      .ThenInclude(producto => producto.IdCategoriaNavigation)
+                    );
+
+                return publicaciones.Adapt<IList<PublicacionDTO>>();
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
             }
 
-            IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
-                .GetByCriteriaIncludingSpecificRelations(
-                    x => x.IdSucursal == sucursal.IdSucursal, // Tu criterio
-
-                    query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
-                                  .ThenInclude(producto => producto.IdCategoriaNavigation)
-                );
-                
-            return publicaciones.Adapt<IList<PublicacionDTO>>();
 
 
         }

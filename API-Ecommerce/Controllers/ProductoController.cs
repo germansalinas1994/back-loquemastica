@@ -23,7 +23,7 @@ namespace API_Ecommerce.Controllers
 
 
         //Inyecto el service por el constructor
-        public ProductoController(ServiceProducto service  )
+        public ProductoController(ServiceProducto service)
         {
             _service = service;
         }
@@ -37,10 +37,7 @@ namespace API_Ecommerce.Controllers
         {
             try
             {
-            //     var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            //     var tokenHandler = new JwtSecurityTokenHandler();
-            //     var jwtToken = tokenHandler.ReadJwtToken(token);
-            //     string user = jwtToken.Claims.First(claim => claim.Type == "email").Value;
+                // string user = UserEmailFromJWT();
 
                 IList<ProductoDTO> productos = await _service.GetAllProductos();
                 ApiResponse response = new ApiResponse(new { data = productos, cantidadProductos = productos.Count() });
@@ -56,59 +53,80 @@ namespace API_Ecommerce.Controllers
             }
         }
 
-            [HttpPut]
-            [Route("/producto/{id}")]
+        [HttpPut]
+        [Route("/producto/{id}")]
 
-            public async Task<ApiResponse> EliminarProducto(int id)
+        public async Task<ApiResponse> EliminarProducto(int id)
+        {
+            try
             {
                 await _service.EliminarProducto(id);
-                ApiResponse response = new ApiResponse("El PID se eliminó exitosamente");
-                return response;
+                return new ApiResponse("El producto se eliminó exitosamente");
             }
-
-            [HttpGet]
-            [Route("/producto/{id}")]
-
-            public async Task<ApiResponse> GetProductoById(int id)
+            catch (ApiException)
             {
-                try
-                {
-                    ProductoDTO producto = await _service.GetProductoById(id);
-                    ApiResponse response = new ApiResponse(new { data = producto });
-                    return response;
-                }
-                catch (Exception ex)
-                {
-                    while (ex.InnerException != null)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    throw new ApiException(ex);
-                }
+                throw;
             }
-
-            //Metodo para cargar productos
-            [HttpPost]
-            [Route("/producto")]
-            public async Task<ApiResponse> CargarProducto([FromBody] ProductoDTO producto)
+            catch (Exception e)
             {
-                await _service.CargarProducto(producto);
-                ApiResponse response = new ApiResponse("El producto se cargó exitosamente");
-                return response;
+                throw new ApiException(e);
             }
-
-            [HttpPut]
-            [Route("/producto")]
-            public async Task<ApiResponse> EditarProducto([FromBody] ProductoDTO producto)
-            {
-                await _service.EditarProducto(producto);
-                ApiResponse response = new ApiResponse("El Producto se modificó exitosamente");
-                return response;
-            }
-
-
 
         }
+
+        [HttpGet]
+        [Route("/producto/{id}")]
+
+        public async Task<ApiResponse> GetProductoById(int id)
+        {
+            try
+            {
+                ProductoDTO producto = await _service.GetProductoById(id);
+                return new ApiResponse(new { data = producto });
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
+        //Metodo para cargar productos
+        [HttpPost]
+        [Route("/producto")]
+        public async Task<ApiResponse> CargarProducto([FromBody] ProductoDTO producto)
+        {
+            try
+            {
+                await _service.CargarProducto(producto);
+                return new ApiResponse("El producto se cargó exitosamente");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
+        [HttpPut]
+        [Route("/producto")]
+        public async Task<ApiResponse> EditarProducto([FromBody] ProductoDTO producto)
+        {
+            await _service.EditarProducto(producto);
+            ApiResponse response = new ApiResponse("El Producto se modificó exitosamente");
+            return response;
+        }
+
+
+
     }
+}
 
 

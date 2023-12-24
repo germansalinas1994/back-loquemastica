@@ -7,6 +7,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
 using MercadoPago.Resource.User;
+using AutoWrapper.Wrappers;
 
 namespace BussinessLogic.Services
 {
@@ -36,19 +37,27 @@ namespace BussinessLogic.Services
             }
         }
 
-        public async Task<bool> EliminarSucursal(int id)
+        public async Task EliminarSucursal(int id)
         {
-
-            Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
-            if (sucursal == null)
+            try
             {
+                Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
+                if (sucursal == null)
+                {
+                    throw new Exception("La sucursal no existe");
+                }
                 sucursal.FechaBaja = DateTime.Now;
                 sucursal.FechaModificacion = DateTime.Now;
-                Sucursal sucursalActualizada = await _unitOfWork.GenericRepository<Sucursal>().Update(sucursal);
+                await _unitOfWork.GenericRepository<Sucursal>().Update(sucursal);
             }
-
-            return true;
-
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
 
         }
 
@@ -63,7 +72,7 @@ namespace BussinessLogic.Services
             catch (Exception e)
             {
                 throw new Exception(e.Message);
-            }                                                                                         
+            }
 
         }
     }
