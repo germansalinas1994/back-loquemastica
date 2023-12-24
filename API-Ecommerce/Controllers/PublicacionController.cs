@@ -144,7 +144,7 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/publicacionesRolSucursal")]
-        // [Authorize(Policy = "Sucursal")]
+        [Authorize(Policy = "Sucursal")]
         public async Task<ApiResponse> GetPublicacionesRolSucursal()
         {
             try

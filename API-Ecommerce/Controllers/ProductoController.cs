@@ -32,7 +32,7 @@ namespace API_Ecommerce.Controllers
         //Metodo para traer todas las categorias
         [HttpGet]
         [Route("/productos")]
-        // [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Admin")]
         public async Task<ApiResponse> GetProductos()
         {
             try
@@ -55,6 +55,8 @@ namespace API_Ecommerce.Controllers
 
         [HttpPut]
         [Route("/producto/{id}")]
+        [Authorize(Policy = "Admin")]
+
 
         public async Task<ApiResponse> EliminarProducto(int id)
         {
@@ -76,6 +78,7 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/producto/{id}")]
+        [Authorize(Policy = "Admin")]
 
         public async Task<ApiResponse> GetProductoById(int id)
         {
@@ -97,6 +100,7 @@ namespace API_Ecommerce.Controllers
         //Metodo para cargar productos
         [HttpPost]
         [Route("/producto")]
+        [Authorize(Policy = "Admin")]
         public async Task<ApiResponse> CargarProducto([FromBody] ProductoDTO producto)
         {
             try
@@ -117,11 +121,23 @@ namespace API_Ecommerce.Controllers
 
         [HttpPut]
         [Route("/producto")]
+        [Authorize(Policy = "Admin")]
         public async Task<ApiResponse> EditarProducto([FromBody] ProductoDTO producto)
         {
-            await _service.EditarProducto(producto);
-            ApiResponse response = new ApiResponse("El Producto se modificó exitosamente");
-            return response;
+            try
+            {
+                await _service.EditarProducto(producto);
+                return new ApiResponse("El producto se modificó exitosamente");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
         }
 
 

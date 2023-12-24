@@ -108,9 +108,9 @@ namespace BussinessLogic.Services
             try
             {
                 //ojo con esto, no es necesario hacer un metodo, se puede buscar la sucursal directamente con la consulta como en la linea 110 (No es necesario el DTO, el dto es para cuando la devolves)
-                SucursalDTO sucursal = await _serviceSucursal.GetSucursalEmail(user);
+                // SucursalDTO sucursal = await _serviceSucursal.GetSucursalEmail(user);
 
-                // Sucursal suc = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
 
                 if (sucursal == null)
                 {
