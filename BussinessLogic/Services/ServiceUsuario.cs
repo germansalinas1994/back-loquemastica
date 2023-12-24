@@ -77,7 +77,7 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
@@ -111,7 +111,7 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
@@ -119,7 +119,7 @@ namespace BussinessLogic.Services
             {
                 throw ex;
             }
-           
+
         }
 
         public async Task<IList<DomicilioDTO>> GetDomicilios(string email)
@@ -143,7 +143,7 @@ namespace BussinessLogic.Services
                 }
 
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
@@ -181,7 +181,7 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
@@ -255,14 +255,15 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException){
+            catch (ApiException)
+            {
                 throw;
             }
             catch (Exception ex)
             {
-               throw ex;
+                throw ex;
             }
-          
+
         }
 
         public async Task<DomicilioDTO> EditarDomicilio(DomicilioDTO domicilio, string user)
@@ -299,14 +300,15 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException){
+            catch (ApiException)
+            {
                 throw;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-           
+
         }
 
         public async Task<List<PedidoDTO>> GetPedidos(string? user)
@@ -342,7 +344,7 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
                 }
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
@@ -350,14 +352,14 @@ namespace BussinessLogic.Services
             {
                 throw ex;
             }
-           
+
         }
 
         public async Task<byte[]> CrearPDF(int idPedido)
         {
             try
             {
-         
+
 
                 Pedido findPedido = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteriaIncludingSpecificRelations(x => x.Id == idPedido,
                      query => query.Include(p => p.Pago)
@@ -388,6 +390,31 @@ namespace BussinessLogic.Services
             catch (ApiException e)
             {
                 throw e;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        internal async Task<string> GetEmailUsuario(int idUsuario)
+        {
+            try
+            {
+                Usuario findUsuario = (await _unitOfWork.UsuarioRepository.GetByCriteria(x => x.IdUsuario == idUsuario)).FirstOrDefault();
+
+                if (findUsuario != null)
+                {
+                    return findUsuario.Email;
+                }
+                else
+                {
+                    throw new ApiException("No se encontro el usuario", (int)HttpStatusCode.NotFound, "No se encontro el usuario");
+                }
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

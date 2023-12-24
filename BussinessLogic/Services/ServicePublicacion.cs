@@ -6,6 +6,9 @@ using DataAccess.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
+using Google.Protobuf.WellKnownTypes;
+using AutoWrapper.Wrappers;
+using System.Net;
 
 
 
@@ -71,7 +74,9 @@ namespace BussinessLogic.Services
 
         public async Task<IList<PublicacionDTO>> GetPublicacionesSucursal(int sucursal)
         {
-            IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
+            try
+            {
+                IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
                 .GetByCriteriaIncludingSpecificRelations(
                     x => x.IdSucursal == sucursal, // Tu criterio
 
@@ -79,7 +84,19 @@ namespace BussinessLogic.Services
                                   .ThenInclude(producto => producto.IdCategoriaNavigation)
                 );
 
-            return publicaciones.Adapt<IList<PublicacionDTO>>();
+                return publicaciones.Adapt<IList<PublicacionDTO>>();
+
+            }
+            catch(ApiException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
         }
     }
 }
