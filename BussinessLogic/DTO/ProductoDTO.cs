@@ -17,7 +17,7 @@ namespace BussinessLogic.DTO
         public string? UrlImagen { get; set; }
 
         public string Nombre { get; set; }
-        public CategoriaDTO IdCategoriaNavigation { get; set; }
+        public CategoriaDTO? IdCategoriaNavigation { get; set; }
 
 
     }
