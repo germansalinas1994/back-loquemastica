@@ -15,11 +15,15 @@ namespace BussinessLogic.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ServiceSucursal _serviceSucursal;
 
+        private readonly ServiceGoogleCloud _serviceGoogleCloud;
+
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceProducto(IUnitOfWork unitOfWork)
+        public ServiceProducto(IUnitOfWork unitOfWork, ServiceGoogleCloud serviceGoogleCloud)
         {
             _unitOfWork = unitOfWork;
             _serviceSucursal = new ServiceSucursal(_unitOfWork);
+            _serviceGoogleCloud = serviceGoogleCloud;
+
         }
 
 
@@ -106,7 +110,10 @@ namespace BussinessLogic.Services
                 nuevoProducto.Precio = (float)producto.Precio;
                 nuevoProducto.IdCategoria = producto.idCategoria;
                 //La imagen vamos a tener que llamar a google cloudfrom, esto despues lo vemos
-                nuevoProducto.UrlImagen = producto.UrlImagen;
+                nuevoProducto.UrlImagen = await _serviceGoogleCloud.SubirImagenAsync(producto.Archivo);
+
+
+                // nuevoProducto.UrlImagen = producto.UrlImagen;
 
                 Producto productoCargado = await _unitOfWork.GenericRepository<Producto>().Insert(nuevoProducto);
 
@@ -118,6 +125,9 @@ namespace BussinessLogic.Services
                     publicacion.IdProducto = productoCargado.IdProducto;
                     publicacion.IdSucursal = sucursal.IdSucursal;
                     publicacion.Stock = 0;
+                    publicacion.FechaDesde = DateTime.Now;
+                    publicacion.FechaActualizacion = DateTime.Now;
+
 
                     //aca no es necesario devolverlo, en caso de que falle el insert va a tirar una excepcion
                     await _unitOfWork.GenericRepository<Publicacion>().Insert(publicacion);

@@ -10,7 +10,8 @@ public partial class Publicacion
 {
     public int IdPublicacion { get; set; }
 
-    public DateTime? FechaDesde { get; set; }
+    public DateTime FechaDesde { get; set; }
+    public DateTime FechaActualizacion { get; set; }
 
     public DateTime? FechaHasta { get; set; }
 

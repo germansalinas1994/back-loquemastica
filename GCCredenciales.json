@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "valiant-memory-403313",
+  "private_key_id": "b30933642ebafdfbffe285be7b7d109ce274b7f1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC6wdET+gGrsYR4\nbbjvdbu2swPI5HSkxdSFfzQ54BxebfYKZYMluSwefTT59UMz2WDfAZW8bK1W8pNk\nS/GKTsVqmcgEiQK++ybPJN7HX9X++Rbvw7VhcXchLwd9JtXKJQmsReiWXrLDqe1h\n9WrjtUdUk2RutftcnkwCFD+chmRuwe4sU7VZ4pwUPgykGTssXRcDsWx34DqPEkbI\noq/h9dScbF+a3zzRooRiIyDX/xw4TUbOSb3gjIE6dYmdPSIgSproHWMur1ve5f51\nLLUJBMahmfVOKoaZj11DqxODJbQgPpApBlUJBpm1oX7WUQkZ8PNjMqy7aTMNIrtZ\neATOkeMPAgMBAAECgf9DBZa1I6a8HNM43VTJ8FXjW8meCx2A6349ydSwjBTtiEee\nc4l3qG2JxNO+P+nHkRrp6DbC2TiTJi+b74cSNze2AnA7qOXTYtYUsvb6BHw91Rea\n2xJTaw0W8iuiPl80wGtWYEzZWbRkaqPI0btBsZMcbzxS92+fsdocvL4hcLom0pv7\nD9psjsSyYRhoEfz//ytZOy4gn4UsZJ9nvweLIc24B17Nk+dw8YwpctTvnl93K1RE\nds6u23B3m0KrWzGItlRIawJmxgOGnlN0bCd0tkzaB1176iKgAww8NYbTOm0LBS+x\nDPR3inapRaBsWefPuNUTxohLOdoE0i26DqGx2NECgYEA/5xZGLDTqaQWoj/BtxJe\nh20ZBRBqfwy4RJyaIDbe4Ukx4RvlSYahO8YQ3mbyHkhAjmk/5nGfLmuwkN7GE1a3\nhI4/YHVdZicEL2jNjv45Sx+eDkt1a7EGkw/cJuyKP+8PKpEplaiTZqimFfxpWR7P\nMbuj1c2ivjaUW72mSZ4T5rECgYEAuwqgIctYY5B/Td4TRHj+m68ol4Xy50Qyvx8D\nR4hv41J+WaXUxEev4RRyYgrvuFeM83Erj/7miQ8455WZgYCYy58q+LWb36Fpv2/N\nDBnPabWuspQNuJ2nj3ZgpecITP/VkD9trDR6qOmasVs8r/4HBWPA/bECc6oJtj0M\n+CwgVb8CgYEA4eMNaaB6rOPxjJjDXEHDf/KNtcf4FSbsgNXT7rwO4xCIH+NDEWME\ngYpbxe878D7xreidK80lWySX+K6mZNixfVcn8tpFG81HCY6YedF4WEcsqn1M20qq\nALR3XX6T/kQJJxj5ouRCvuozPCLABp4PhGfKNVtwgqBBI4HJvi0QcUECgYEAkgBQ\nUTDetRF1Hf5MwfVEoZgPsn9/xWCp0CBQOgVZeXPKZwYYWIKw2pxQURHCX/4Pa3Qa\nkhNiNvin7bYMFlegbcm4DF4O53ijCCkoQNrg2d5VGNaTA1olEspP1RDLnPdS6H9q\nh7KLUNDQzMKwU5ySNHXSjvUeOdUwMY3kUtB3CRcCgYEA1t/HnxbpL8N5RrXlBJbp\nZjlJatdPIWTzUkRc1BeMZwtaT4AGyV5hBNQFSnV+8sW7goEJmgzb0JfcSd2FOpvo\nzxVSu7ufIIbIJowT6dY1T1KgQRYGsHP+U7oa+ekX+NDJ0sS93xwH9TKBg8Vusv3U\nb3npCXdKaloF3WVWI3yKeWk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "asp-net-ecommerce@valiant-memory-403313.iam.gserviceaccount.com",
+  "client_id": "111258496951286589915",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/asp-net-ecommerce%40valiant-memory-403313.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

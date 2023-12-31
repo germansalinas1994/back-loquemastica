@@ -1,5 +1,6 @@
 ﻿using System;
 using DataAccess.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace BussinessLogic.DTO
 {
@@ -18,6 +19,9 @@ namespace BussinessLogic.DTO
 
         public string Nombre { get; set; }
         public CategoriaDTO? IdCategoriaNavigation { get; set; }
+
+        public IFormFile? Archivo { get; set; }
+
 
 
     }
