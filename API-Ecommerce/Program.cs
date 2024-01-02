@@ -29,7 +29,7 @@ QuestPDF.Settings.License = LicenseType.Community;
 //agrego la inyeccion de dependencia de mercado pago, para poder usar el servicio que cree
 builder.Services.Configure<MercadoPagoDevSettings>(builder.Configuration.GetSection("MercadoPagoDev"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
+builder.Services.Configure<GoogleCloudStorage>(builder.Configuration.GetSection("GoogleCloudStorage"));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -82,6 +82,7 @@ builder.Services.AddScoped<ServiceUsuario>();
 builder.Services.AddScoped<ServiceSucursal>();
 builder.Services.AddScoped<ServiceReporte>();
 builder.Services.AddScoped<ServiceMail>();
+builder.Services.AddScoped<ServiceGoogleCloud>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -156,6 +157,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 
+
 var app = builder.Build();
 
 
@@ -184,7 +186,8 @@ if (app.Environment.IsDevelopment())
 
 }
 
-app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions {
+app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions
+{
     // Aquí puedes personalizar las opciones como prefieras
     IsDebug = app.Environment.IsDevelopment()
 });

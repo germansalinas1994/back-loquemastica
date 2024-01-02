@@ -101,7 +101,7 @@ namespace API_Ecommerce.Controllers
         [HttpPost]
         [Route("/producto")]
         [Authorize(Policy = "Admin")]
-        public async Task<ApiResponse> CargarProducto([FromBody] ProductoDTO producto)
+        public async Task<ApiResponse> CargarProducto([FromForm] ProductoDTO producto)
         {
             try
             {
