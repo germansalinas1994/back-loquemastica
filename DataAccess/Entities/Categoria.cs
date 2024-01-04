@@ -17,5 +17,7 @@ public partial class Categoria
 
     public string? Nombre { get; set; }
 
+    public bool? Agrupador { get; set; }
+
     public virtual ICollection<Producto> Producto { get; set; } = new List<Producto>();
 }
