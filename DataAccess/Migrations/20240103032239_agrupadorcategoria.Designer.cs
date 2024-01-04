@@ -3,6 +3,7 @@ using System;
 using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DbveterinariaContext))]
-    partial class DbveterinariaContextModelSnapshot : ModelSnapshot
+    [Migration("20240103032239_agrupadorcategoria")]
+    partial class agrupadorcategoria
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,7 +29,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idCategoria");
 
-                    b.Property<bool?>("Agrupador")
+                    b.Property<bool>("Agrupador")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Descripcion")

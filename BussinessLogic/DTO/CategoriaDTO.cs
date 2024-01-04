@@ -10,6 +10,9 @@ namespace BussinessLogic.DTO
         public string? Nombre { get; set; }
         public string? Descripcion { get; set; }
 
+        public bool? Agrupador { get; set; }
+
+
 
         // public virtual ICollection<ProductoDTO> Producto { get; set; } = new List<ProductoDTO>();
 
