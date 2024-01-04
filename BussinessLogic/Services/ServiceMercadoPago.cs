@@ -67,6 +67,8 @@ namespace BussinessLogic.Services
                 //busco las publicaciones 
                 List<PublicacionDTO> publicaciones = (await _servicePublicacion.GetPublicacionesCarrito(preferencePago.Publicaciones)).ToList();
 
+                int idSucursal = publicaciones[0].IdSucursalNavigation.IdSucursal;
+
                 if (publicaciones == null || publicaciones.Count == 0)
                 {
                     throw new ApiException("No se encontraron publicaciones en el carrito");
@@ -117,7 +119,8 @@ namespace BussinessLogic.Services
                 request.Metadata = new Dictionary<string, object>
                 {
                     {"idUsuario", idUsuario.ToString() },
-                    {"idDomicilio", idDomicilio.ToString() }
+                    {"idDomicilio", idDomicilio.ToString()},
+                    {"idSucursal", idSucursal.ToString()}
                 };
 
 
@@ -201,6 +204,7 @@ namespace BussinessLogic.Services
                 //tengo que recuperar el id usuario de la metadata
                 //el id usuario lo uso para guardarlo en el pedido
                 int idUsuario = Convert.ToInt32(payment.Metadata["id_usuario"].ToString());
+                int idSucursal = Convert.ToInt32(payment.Metadata["id_sucursal"].ToString());
 
                 //el id de la orden de pago lo uso para guardarlo en el pedido
                 long ordenDeCompra = payment.Order.Id.Value;
@@ -241,6 +245,7 @@ namespace BussinessLogic.Services
                     pedido.FechaAlta = DateTime.Now;
                     pedido.FechaModificacion = DateTime.Now;
                     pedido.Orden_MercadoPago = ordenDeCompra;
+                    pedido.IdSucursalPedido = idSucursal;
                     pedido.Total = total;
 
                     pedido = await _unitOfWork.GenericRepository<Pedido>().Insert(pedido);

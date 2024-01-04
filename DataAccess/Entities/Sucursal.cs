@@ -20,4 +20,5 @@ public partial class Sucursal
     public DateTime? FechaModificacion { get; set; }
 
     public virtual ICollection<Publicacion> Publicacion { get; set; } = new List<Publicacion>();
+    public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 }

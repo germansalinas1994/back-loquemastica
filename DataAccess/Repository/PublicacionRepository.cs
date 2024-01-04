@@ -41,7 +41,7 @@ namespace DataAccess.Repository
         {
             try
             {
-                return _context.Publicacion.Include(x => x.IdProductoNavigation).Where(x => ids.Contains(x.IdPublicacion)).ToListAsync();
+                return _context.Publicacion.Include(x => x.IdProductoNavigation).Include(x => x.IdSucursalNavigation).Where(x => ids.Contains(x.IdPublicacion)).ToListAsync();
             }
             catch (Exception ex)
             {

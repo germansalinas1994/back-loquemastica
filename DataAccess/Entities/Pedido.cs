@@ -8,7 +8,7 @@ public partial class Pedido
     public int Id { get; set; }
 
     public int? IdUsuario { get; set; }
-
+    public int? IdSucursalPedido { get; set; }
     public DateTime? FechaAlta { get; set; }
 
     public DateTime? FechaBaja { get; set; }
@@ -23,8 +23,9 @@ public partial class Pedido
     public virtual Pago Pago { get; set; }
 
     public virtual Envio? Envio { get; set; }
+    public virtual Sucursal? Sucursal { get; set; }
 
-        public virtual ICollection<PublicacionPedido> PublicacionPedido { get; set; } = new List<PublicacionPedido>();
+    public virtual ICollection<PublicacionPedido> PublicacionPedido { get; set; } = new List<PublicacionPedido>();
 
 
 }
