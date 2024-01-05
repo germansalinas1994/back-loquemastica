@@ -122,7 +122,7 @@ namespace API_Ecommerce.Controllers
         [HttpPut]
         [Route("/producto")]
         [Authorize(Policy = "Admin")]
-        public async Task<ApiResponse> EditarProducto([FromBody] ProductoDTO producto)
+        public async Task<ApiResponse> EditarProducto([FromForm] ProductoDTO producto)
         {
             try
             {
