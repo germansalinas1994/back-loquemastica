@@ -239,6 +239,7 @@ public partial class DbveterinariaContext : DbContext
           entity.ToTable("pedido");
 
           entity.HasIndex(e => e.IdUsuario, "id_Usuario_FKPedido");
+          entity.HasIndex(e => e.IdSucursalPedido, "id_sucursal_pedido_Fk");
 
           entity.Property(e => e.Id).HasColumnName("id");
           entity.Property(e => e.FechaAlta)
@@ -260,9 +261,14 @@ public partial class DbveterinariaContext : DbContext
                 .HasColumnName("total");
 
           entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
+          entity.Property(e => e.IdSucursalPedido).HasColumnName("id_sucursal_pedido");
           entity.HasOne(d => d.Usuario).WithMany(p => p.Pedido)
               .HasForeignKey(d => d.IdUsuario)
               .HasConstraintName("id_Usuario_FKPedido");
+
+         entity.HasOne(d => d.Sucursal).WithMany(p => p.Pedidos)
+              .HasForeignKey(d => d.IdSucursalPedido)
+              .HasConstraintName("id_sucursal_pedido_Fk");
       });
 
 

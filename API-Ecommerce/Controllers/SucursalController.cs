@@ -69,6 +69,26 @@ namespace API_Ecommerce.Controllers
             
         }
 
+        [HttpGet]
+        [Route("/getPedidosSucursal")]
+        public async Task<ApiResponse> GetPedidosSucursal()
+        {
+            try
+            {
+                string user = UserEmailFromJWT();
+                List<PedidoDTO> pedidos = await _serviceSucursal.GetPedidosSucursal(user);
+                return new ApiResponse(pedidos);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
 
     }
 }

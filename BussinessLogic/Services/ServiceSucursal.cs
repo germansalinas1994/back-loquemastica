@@ -75,5 +75,21 @@ namespace BussinessLogic.Services
             }
 
         }
+
+        public async Task<List<PedidoDTO>> GetPedidosSucursal(string user)
+        {
+            try
+            {
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user, 
+                  query => query.Include(p => p.Pedidos).ThenInclude(pedido => pedido.Envio)
+                )).FirstOrDefault();
+                List<Pedido> pedidos = sucursal.Pedidos.ToList();
+                return pedidos.Adapt<List<PedidoDTO>>();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
