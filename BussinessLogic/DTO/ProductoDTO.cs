@@ -19,12 +19,9 @@ namespace BussinessLogic.DTO
 
         public string Nombre { get; set; }
         public CategoriaDTO? IdCategoriaNavigation { get; set; }
-<<<<<<< HEAD
-=======
 
         public IFormFile? Archivo { get; set; }
 
->>>>>>> 00bc07b643cd90c02a3c4f189645c9ce73901536
 
 
     }

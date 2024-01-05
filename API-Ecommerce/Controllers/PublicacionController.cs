@@ -150,6 +150,8 @@ namespace API_Ecommerce.Controllers
             try
             {
                 string user = UserEmailFromJWT();
+             
+
 
                 IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesRolSucursal(user);
                 return new ApiResponse(new { data = publicaciones });
@@ -167,7 +169,32 @@ namespace API_Ecommerce.Controllers
 
         }
 
+        [HttpPut]
+        [Route("/publicacion")]
+        [Authorize(Policy = "Sucursal")]
+
+        public async Task<ApiResponse> EditarPublicacion([FromBody] PublicacionDTO publicacion)
+        {
+            try
+            {
+                if (publicacion == null)
+                {
+                    throw new ApiException("Debe ingresar una publicacion");
+                }
+                await _service.EditarPublicacion(publicacion);
+                return new ApiResponse("La publicacion se edito correctamente");
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+
     }
+}
 }
 
 
