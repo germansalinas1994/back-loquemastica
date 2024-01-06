@@ -80,7 +80,7 @@ namespace BussinessLogic.Services
         {
             try
             {
-                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user, 
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user,
                   query => query.Include(p => p.Pedidos).ThenInclude(pedido => pedido.Envio)
                 )).FirstOrDefault();
                 List<Pedido> pedidos = sucursal.Pedidos.ToList();
@@ -89,6 +89,64 @@ namespace BussinessLogic.Services
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<SucursalDTO> GetSucursalById(int id)
+        {
+
+            try
+            {
+                Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
+                if (sucursal == null)
+                {
+                    throw new Exception("La sucursal no existe");
+                }
+                return sucursal.Adapt<SucursalDTO>();
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
+        public async Task CargarSucursal(SucursalDTO sucursal)
+        {
+            try
+            {
+
+                Sucursal sucursalExistente = _unitOfWork.GenericRepository<Sucursal>().GetAll().Result.Where(s => s.EmailSucursal == sucursal.EmailSucursal).FirstOrDefault();
+                if (sucursalExistente != null)
+                {
+                    throw new Exception("El mail de la sucursal ya existe");
+                }
+
+                await _unitOfWork.BeginTransactionAsync();
+
+
+                Sucursal sucursalBase = sucursal.Adapt<Sucursal>();
+                sucursalBase.EmailSucursal = sucursal.EmailSucursal;
+                sucursalBase.Nombre = sucursal.Nombre;
+                sucursalBase.Direccion = sucursal.Direccion;
+                sucursalBase.FechaAlta = DateTime.Now;
+                sucursalBase.FechaModificacion = DateTime.Now;
+                await _unitOfWork.GenericRepository<Sucursal>().Insert(sucursalBase);
+
+                await _unitOfWork.CommitAsync();
+            }
+            catch (ApiException)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+            catch (Exception e)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw new ApiException(e);
             }
         }
     }

@@ -6,6 +6,8 @@ using BussinessLogic.DTO;
 using BussinessLogic.DTO.Search;
 using BussinessLogic.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
 using AutoWrapper.Wrappers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -35,20 +37,21 @@ namespace API_Ecommerce.Controllers
                 List<SucursalDTO> sucursales = await _serviceSucursal.GetSucursales();
                 return new ApiResponse(sucursales);
             }
-            catch(ApiException)
+            catch (ApiException)
             {
                 throw;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ApiException(ex);
             }
-          
-          
+
+
         }
 
         [HttpPut]
         [Route("/sucursales/{id}")]
+        [Authorize(Policy = "Admin")]
 
         public async Task<ApiResponse> EliminarSucursal(int id)
         {
@@ -66,7 +69,7 @@ namespace API_Ecommerce.Controllers
                 throw new ApiException(ex);
             }
 
-            
+
         }
 
         [HttpGet]
@@ -88,6 +91,70 @@ namespace API_Ecommerce.Controllers
                 throw new ApiException(ex);
             }
         }
+
+
+        [HttpGet]
+        [Route("/sucursal/{id}")]
+        [Authorize(Policy = "Admin")]
+
+        public async Task<ApiResponse> GetSucursalById(int id)
+        {
+            try
+            {
+                SucursalDTO sucursal = await _serviceSucursal.GetSucursalById(id);
+                return new ApiResponse(new { data = sucursal });
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
+        [HttpPost]
+        [Route("/sucursal")]
+        [Authorize(Policy = "Admin")]
+        public async Task<ApiResponse> CargarSucursal([FromBody] SucursalDTO sucursal)
+        {
+            try
+            {
+                await _serviceSucursal.CargarSucursal(sucursal);
+                return new ApiResponse("La sucursal se cargó exitosamente");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
+        // [HttpPut]
+        // [Route("/producto")]
+        // [Authorize(Policy = "Admin")]
+        // public async Task<ApiResponse> EditarProducto([FromForm] ProductoDTO producto)
+        // {
+        //     try
+        //     {
+        //         await _service.EditarProducto(producto);
+        //         return new ApiResponse("El producto se modificó exitosamente");
+
+        //     }
+        //     catch (ApiException)
+        //     {
+        //         throw;
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         throw new ApiException(e);
+        //     }
+        // }
 
 
     }
