@@ -74,6 +74,7 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/getPedidosSucursal")]
+        [Authorize(Policy = "Sucursal")]
         public async Task<ApiResponse> GetPedidosSucursal()
         {
             try
