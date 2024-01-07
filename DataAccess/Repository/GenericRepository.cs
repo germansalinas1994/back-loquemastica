@@ -174,7 +174,7 @@ namespace DataAccess.Repository
             return await query.ToListAsync();
         }
 
-        public async Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate,Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+        public async Task<IList<T>> GetByCriteriaIncludingSpecificRelations(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
         {
             IQueryable<T> query = _context.Set<T>().AsQueryable();
 
@@ -187,6 +187,15 @@ namespace DataAccess.Repository
 
             return await query.ToListAsync();
         }
+
+
+        public IQueryable<T> Search()
+        {
+            return _context.Set<T>().AsQueryable();
+        }
+
+
+
 
         public async Task<T?> GetByIdIncludingRelations(int id)
         {

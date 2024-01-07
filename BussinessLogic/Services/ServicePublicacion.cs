@@ -9,6 +9,7 @@ using BussinessLogic.DTO.Search;
 using Google.Protobuf.WellKnownTypes;
 using AutoWrapper.Wrappers;
 using System.Net;
+using ZstdSharp.Unsafe;
 
 
 
@@ -75,20 +76,37 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task<IList<PublicacionDTO>> GetPublicacionesSucursal(int sucursal)
+
+        public async Task<IList<PublicacionDTO>> GetPublicacionesSucursal(int sucursal, int? categoria, string? input)
         {
             try
             {
-                IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
-                .GetByCriteriaIncludingSpecificRelations(
-                    x => x.IdSucursal == sucursal, // Tu criterio
+                // Inicializa la consulta base
+                var search = _unitOfWork.GenericRepository<Publicacion>().Search()
+                                          .Where(x => x.IdSucursal == sucursal);
 
-                    query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
-                                  .ThenInclude(producto => producto.IdCategoriaNavigation)
-                );
+                // Agrega condiciones de filtrado si es necesario
+                if (categoria != null)
+                {
+                    search = search.Where(x => x.IdProductoNavigation.IdCategoriaNavigation.IdCategoria == categoria);
+                }
+
+                if (input != null)
+                {
+                    search = search.Where(x => x.IdProductoNavigation.Descripcion.Contains(input) ||
+                                             x.IdProductoNavigation.Nombre.Contains(input) ||
+                                             x.IdProductoNavigation.IdCategoriaNavigation.Nombre.Contains(input) ||
+                                             x.IdProductoNavigation.IdCategoriaNavigation.Descripcion.Contains(input));
+                }
+
+                // Incluye relaciones después de aplicar filtros
+                search = search.Include(p => p.IdProductoNavigation)
+                             .ThenInclude(producto => producto.IdCategoriaNavigation);
+
+                // Ejecuta la consulta y retorna el resultado
+                List<Publicacion> publicaciones = await search.ToListAsync();
 
                 return publicaciones.Adapt<IList<PublicacionDTO>>();
-
             }
             catch (ApiException ex)
             {
@@ -98,9 +116,12 @@ namespace BussinessLogic.Services
             {
                 throw ex;
             }
-
-
         }
+
+
+
+
+
 
         public async Task<IList<PublicacionDTO>> GetPublicacionesRolSucursal(string user)
         {
@@ -142,6 +163,32 @@ namespace BussinessLogic.Services
 
         }
 
+        public async Task<IList<PublicacionDTO>> GetPublicacionesCategoria(int categoria, int sucursal)
+        {
+            try
+            {
+                IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
+                .GetByCriteriaIncludingSpecificRelations(
+                    x => x.IdSucursal == sucursal && x.IdProductoNavigation.IdCategoriaNavigation.IdCategoria == categoria, // Tu criterio
+
+                    query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
+                                  .ThenInclude(producto => producto.IdCategoriaNavigation)
+                );
+
+                return publicaciones.Adapt<IList<PublicacionDTO>>();
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+
+        }
+
         public async Task EditarPublicacion(PublicacionDTO publicacion)
         {
             try
@@ -167,6 +214,7 @@ namespace BussinessLogic.Services
 
 
             }
+
+        }
     }
-}
 }
