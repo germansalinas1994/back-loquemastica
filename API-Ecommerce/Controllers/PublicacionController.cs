@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,11 +31,11 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/publicaciones")]
-        public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal)
+        public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal, int? categoria, string? input)
         {
             try
             {
-                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesSucursal(sucursal);
+                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesSucursal(sucursal,categoria,input);
                 ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
                 return response;
             }
@@ -153,7 +154,7 @@ namespace API_Ecommerce.Controllers
 
                 IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesRolSucursal(user);
                 return new ApiResponse(new { data = publicaciones });
-            
+
             }
             catch (ApiException)
             {
@@ -165,6 +166,27 @@ namespace API_Ecommerce.Controllers
             }
 
 
+        }
+
+        [HttpGet]
+        [Route("/publicacionesCategoria")]
+        [AllowAnonymous]
+        public async Task<ApiResponse> GetPublicacionesCategoria([FromQuery] int categoria, int sucursal, string input)
+        {
+            try
+            {
+                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesCategoria(categoria, sucursal);
+                return new ApiResponse(publicaciones, (int)HttpStatusCode.OK);
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
 
     }
