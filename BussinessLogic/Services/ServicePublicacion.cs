@@ -188,5 +188,33 @@ namespace BussinessLogic.Services
             }
 
         }
+
+        public async Task EditarPublicacion(PublicacionDTO publicacion)
+        {
+            try
+            {
+                Publicacion publicacionBase = await _unitOfWork.GenericRepository<Publicacion>().GetById(publicacion.IdPublicacion);
+
+                if (publicacionBase != null)
+                {
+                    publicacionBase.Stock = publicacion.Stock;
+                    publicacionBase.FechaActualizacion = DateTime.Now;
+                }
+
+                await _unitOfWork.GenericRepository<Publicacion>().Update(publicacionBase);
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+
+
+            }
+
+        }
     }
 }

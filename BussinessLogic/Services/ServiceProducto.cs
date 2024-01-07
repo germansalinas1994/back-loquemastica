@@ -162,8 +162,9 @@ namespace BussinessLogic.Services
                     productoBase.Descripcion = producto.Descripcion;
                     productoBase.Precio = (float)producto.Precio;
                     productoBase.IdCategoria = producto.idCategoria;
-                    productoBase.UrlImagen = producto.UrlImagen;
                     productoBase.FechaModificacion = DateTime.Now;
+                    productoBase.UrlImagen = await _serviceGoogleCloud.SubirImagenAsync(producto.Archivo);
+
                 }
 
                 await _unitOfWork.GenericRepository<Producto>().Update(productoBase);
