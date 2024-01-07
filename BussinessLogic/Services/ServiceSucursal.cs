@@ -81,8 +81,8 @@ namespace BussinessLogic.Services
             try
             {
                 Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user,
-                  query => query.Include(p => p.Pedidos).ThenInclude(pedido => pedido.Envio)
-                )).FirstOrDefault();
+                    query => query.Include(p => p.Pedidos).Include(pe => pe.Pedidos).ThenInclude(pupe => pupe.PublicacionPedido).ThenInclude(pu => pu.Publicacion).ThenInclude(pr => pr.IdProductoNavigation))).FirstOrDefault();
+
                 List<Pedido> pedidos = sucursal.Pedidos.ToList();
                 return pedidos.Adapt<List<PedidoDTO>>();
             }
