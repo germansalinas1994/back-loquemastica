@@ -80,7 +80,7 @@ namespace API_Ecommerce.Controllers
             try
             {
                 string user = UserEmailFromJWT();
-                List<PedidoDTO> pedidos = await _serviceSucursal.GetPedidosSucursal(user);
+                List<PedidoSucursalDTO> pedidos = await _serviceSucursal.GetPedidosSucursal(user);
                 return new ApiResponse(pedidos);
             }
             catch (ApiException)
