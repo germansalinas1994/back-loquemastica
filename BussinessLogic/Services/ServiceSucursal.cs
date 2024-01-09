@@ -76,15 +76,49 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task<List<PedidoDTO>> GetPedidosSucursal(string user)
+        public async Task<List<PedidoSucursalDTO>> GetPedidosSucursal(string user)
         {
             try
             {
-                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user,
-                    query => query.Include(p => p.Pedidos).Include(pe => pe.Pedidos).ThenInclude(pupe => pupe.PublicacionPedido).ThenInclude(pu => pu.Publicacion).ThenInclude(pr => pr.IdProductoNavigation))).FirstOrDefault();
+                List<PedidoSucursalDTO> pedidosDTO = new List<PedidoSucursalDTO>();
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
+                // Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteriaIncludingSpecificRelations(x => x.EmailSucursal == user,
+                //     query => query.Include(p => p.Pedidos).Include(pe => pe.Pedidos).ThenInclude(pupe => pupe.PublicacionPedido).ThenInclude(pu => pu.Publicacion).ThenInclude(pr => pr.IdProductoNavigation))).FirstOrDefault();
+                List<Pedido> pedidos = (await _unitOfWork.GenericRepository<Pedido>().GetByCriteriaIncludingSpecificRelations(x => x.IdSucursalPedido == sucursal.IdSucursal,
+                    query => query.Include(p => p.PublicacionPedido)
+                    .ThenInclude(pu => pu.Publicacion)
+                    .ThenInclude(pr => pr.IdProductoNavigation)
+                    .Include(e => e.Envio)
+                    .ThenInclude(ee => ee.EstadoEnvio)
+                    .Include(u => u.Usuario)
+                    )).ToList();
+                if (pedidos != null && pedidos.Count > 0)
+                {
+                    pedidosDTO = pedidos.Select(p => new PedidoSucursalDTO
+                    {
+                        Id = p.Id,
+                        Fecha = p.FechaAlta,
+                        Orden_MercadoPago = p.Orden_MercadoPago,
+                        EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
+                        EmailUsuario = p.Usuario.Email,
+                        Total = p.Total,
+                        DetallePedido = p.PublicacionPedido.Select(pp => new DetallePedidoDTO
+                        {
+                            // Aquí mapea los campos del detalle del pedido según tus necesidades
+                            Id = pp.IdPublicacion,
+                            Cantidad = pp.Cantidad,
+                            Precio = pp.Precio,
+                            NombreProducto = pp.Publicacion.IdProductoNavigation.Nombre,
+                            SubTotal = pp.Cantidad * pp.Precio
+                            // Agrega más campos según sea necesario
+                        }).ToList()
+                    }).ToList();
 
-                List<Pedido> pedidos = sucursal.Pedidos.ToList();
-                return pedidos.Adapt<List<PedidoDTO>>();
+
+                }
+                return pedidosDTO;
+
+
             }
             catch (Exception e)
             {
