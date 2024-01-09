@@ -77,7 +77,7 @@ namespace BussinessLogic.Services
         }
 
 
-        public async Task<IList<PublicacionDTO>> GetPublicacionesSucursal(int sucursal, int? categoria, string? input)
+        public async Task<(IList<PublicacionDTO> publicaciones, int totalCount)> GetPublicacionesSucursal(int sucursal, int? categoria, string? input, int page, int pageSize)
         {
             try
             {
@@ -94,19 +94,23 @@ namespace BussinessLogic.Services
                 if (input != null)
                 {
                     search = search.Where(x => x.IdProductoNavigation.Descripcion.Contains(input) ||
-                                             x.IdProductoNavigation.Nombre.Contains(input) ||
-                                             x.IdProductoNavigation.IdCategoriaNavigation.Nombre.Contains(input) ||
-                                             x.IdProductoNavigation.IdCategoriaNavigation.Descripcion.Contains(input));
+                                                x.IdProductoNavigation.Nombre.Contains(input) ||
+                                                x.IdProductoNavigation.IdCategoriaNavigation.Nombre.Contains(input) ||
+                                                x.IdProductoNavigation.IdCategoriaNavigation.Descripcion.Contains(input));
                 }
 
-                // Incluye relaciones después de aplicar filtros
-                search = search.Include(p => p.IdProductoNavigation)
-                             .ThenInclude(producto => producto.IdCategoriaNavigation);
+                // Calcula el total de elementos antes de aplicar la paginación
+                int totalCount = await search.CountAsync();
 
-                // Ejecuta la consulta y retorna el resultado
-                List<Publicacion> publicaciones = await search.ToListAsync();
+                //el skip es para que no te traiga todos los datos, sino que te traiga los datos de la pagina que queres
+                //hago el page -1 porque el skip empieza desde 0 y el page desde 1, asi ubico bien la pagina
+                var publicaciones = await search.Skip((page - 1) * pageSize)
+                                                .Take(pageSize)
+                                                .Include(p => p.IdProductoNavigation)
+                                                .ThenInclude(producto => producto.IdCategoriaNavigation)
+                                                .ToListAsync();
 
-                return publicaciones.Adapt<IList<PublicacionDTO>>();
+                return (publicaciones.Adapt<IList<PublicacionDTO>>(), totalCount);
             }
             catch (ApiException ex)
             {
@@ -117,8 +121,6 @@ namespace BussinessLogic.Services
                 throw ex;
             }
         }
-
-
 
 
 

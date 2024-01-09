@@ -31,13 +31,21 @@ namespace API_Ecommerce.Controllers
 
         [HttpGet]
         [Route("/publicaciones")]
-        public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal, int? categoria, string? input)
+        public async Task<ApiResponse> GetPublicaciones([FromQuery] int sucursal, int? categoria, string? input, int page = 1, int pageSize = 12)
         {
             try
             {
-                IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesSucursal(sucursal,categoria,input);
-                ApiResponse response = new ApiResponse(new { data = publicaciones, cantidadPublicaciones = publicaciones.Count() });
+                var (publicaciones, totalCount) = await _service.GetPublicacionesSucursal(sucursal, categoria, input, page, pageSize);
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                ApiResponse response = new ApiResponse(new
+                {
+                    data = publicaciones,
+                    cantidadPublicaciones = totalCount,
+                    currentPage = page,
+                    totalPages = totalPages
+                });
                 return response;
+                
             }
             catch (ApiException)
             {
@@ -151,7 +159,7 @@ namespace API_Ecommerce.Controllers
             try
             {
                 string user = UserEmailFromJWT();
-             
+
 
 
                 IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesRolSucursal(user);
@@ -215,8 +223,8 @@ namespace API_Ecommerce.Controllers
                 throw new ApiException(ex);
             }
 
+        }
     }
-}
 }
 
 
