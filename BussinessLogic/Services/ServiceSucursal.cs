@@ -116,7 +116,7 @@ namespace BussinessLogic.Services
 
 
                 }
-                return pedidosDTO;
+                return pedidosDTO.OrderByDescending(p => p.Fecha).ToList();
 
 
             }
