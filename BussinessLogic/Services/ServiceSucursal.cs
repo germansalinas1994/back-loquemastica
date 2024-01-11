@@ -28,7 +28,7 @@ namespace BussinessLogic.Services
         {
             try
             {
-                IList<Sucursal> sucursales = await _unitOfWork.GenericRepository<Sucursal>().GetAll();
+                IList<Sucursal> sucursales = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.FechaBaja == null)).OrderByDescending(x => x.FechaAlta).ToList();
                 return sucursales.Adapt<List<SucursalDTO>>();
             }
             catch (Exception e)
@@ -180,6 +180,31 @@ namespace BussinessLogic.Services
             catch (Exception e)
             {
                 await _unitOfWork.RollbackAsync();
+                throw new ApiException(e);
+            }
+        }
+
+        public async Task EditarSucursal(SucursalDTO sucursal)
+        {
+            try
+            {
+                Sucursal sucursalExistente = await _unitOfWork.GenericRepository<Sucursal>().GetById(sucursal.IdSucursal);
+                if (sucursalExistente == null)
+                {
+                    throw new Exception("La sucursal no existe");
+                }
+                sucursalExistente.Nombre = sucursal.Nombre;
+                sucursalExistente.Direccion = sucursal.Direccion;
+                sucursalExistente.EmailSucursal = sucursal.EmailSucursal;
+                sucursalExistente.FechaModificacion = DateTime.Now;
+                await _unitOfWork.GenericRepository<Sucursal>().Update(sucursalExistente);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
                 throw new ApiException(e);
             }
         }
