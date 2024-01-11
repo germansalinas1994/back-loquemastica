@@ -136,26 +136,28 @@ namespace API_Ecommerce.Controllers
             }
         }
 
-        // [HttpPut]
-        // [Route("/producto")]
-        // [Authorize(Policy = "Admin")]
-        // public async Task<ApiResponse> EditarProducto([FromForm] ProductoDTO producto)
-        // {
-        //     try
-        //     {
-        //         await _service.EditarProducto(producto);
-        //         return new ApiResponse("El producto se modificó exitosamente");
+        [HttpPut]
+        [Route("/sucursal")]
+        [Authorize(Policy = "Admin")]
 
-        //     }
-        //     catch (ApiException)
-        //     {
-        //         throw;
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         throw new ApiException(e);
-        //     }
-        // }
+        public async Task<ApiResponse> EditarSucursal([FromBody] SucursalDTO sucursal)
+        {
+            try
+            {
+                await _serviceSucursal.EditarSucursal(sucursal);
+                return new ApiResponse("La sucursal se modificó exitosamente");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
 
 
     }
