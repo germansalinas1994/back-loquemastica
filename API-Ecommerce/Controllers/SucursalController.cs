@@ -93,6 +93,27 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("/CambiarEstadoEnvio")]
+        [Authorize(Policy = "Sucursal")]
+
+        public async Task<ApiResponse> CambiarEstadoEnvio([FromBody] ChangeEstadoEnvio estadoEnvio)
+        {
+            try
+            {
+                await _serviceSucursal.CambiarEstadoEnvio(estadoEnvio.IdPedido, estadoEnvio.IdEstadoEnvio);
+                return new ApiResponse("El estado del pedido se modificó exitosamente");
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
 
         [HttpGet]
         [Route("/sucursal/{id}")]
@@ -160,6 +181,13 @@ namespace API_Ecommerce.Controllers
 
 
 
+
+
+    }
+    public class ChangeEstadoEnvio
+    {
+        public int IdPedido { get; set; }
+        public int IdEstadoEnvio { get; set; }
     }
 }
 
