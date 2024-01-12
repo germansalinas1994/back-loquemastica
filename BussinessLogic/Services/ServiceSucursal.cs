@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BussinessLogic.DTO.Search;
 using MercadoPago.Resource.User;
 using AutoWrapper.Wrappers;
+using System.Net;
 
 namespace BussinessLogic.Services
 {
@@ -101,6 +102,7 @@ namespace BussinessLogic.Services
                         Orden_MercadoPago = p.Orden_MercadoPago,
                         EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
                         EmailUsuario = p.Usuario.Email,
+                        idEstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.IdEstadoEnvio : null,
                         Total = p.Total,
                         DetallePedido = p.PublicacionPedido.Select(pp => new DetallePedidoDTO
                         {
@@ -207,6 +209,36 @@ namespace BussinessLogic.Services
             {
                 throw new ApiException(e);
             }
+        }
+
+        public async Task CambiarEstadoEnvio(int idPedido, int idEstadoEnvio)
+        {
+            try
+            {
+                Envio envio = (await _unitOfWork.GenericRepository<Envio>().GetByCriteria(x => x.IdPedido == idPedido)).FirstOrDefault();
+                if (envio == null)
+                {
+                    throw new ApiException("El pedido no tiene envio", (int)HttpStatusCode.BadRequest, "El pedido no tiene envio");
+                }
+                Estadoenvio estadonEnvio = await _unitOfWork.GenericRepository<Estadoenvio>().GetById(idEstadoEnvio);
+                if (estadonEnvio == null)
+                {
+                    throw new ApiException("El estado del pedido no existe", (int)HttpStatusCode.BadRequest, "El estado del pedido no existe");
+                }
+
+                envio.IdEstadoEnvio = idEstadoEnvio;
+                envio.FechaModificacion = DateTime.Now;
+                await _unitOfWork.GenericRepository<Envio>().Update(envio);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
         }
     }
 }

@@ -16,6 +16,8 @@ namespace BussinessLogic.DTO
     public virtual List<DetallePedidoDTO> DetallePedido { get; set; } = new List<DetallePedidoDTO>();
 
     public virtual string? EstadoEnvio { get; set; }
+
+    public virtual int? idEstadoEnvio { get; set; }
     public DateTime? Fecha { get; set; }
 
 
