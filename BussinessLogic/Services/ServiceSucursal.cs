@@ -171,6 +171,17 @@ namespace BussinessLogic.Services
                 await _unitOfWork.GenericRepository<Sucursal>().Insert(sucursalBase);
 
                 await _unitOfWork.CommitAsync();
+                IList<Producto> productos = await _unitOfWork.GenericRepository<Producto>().GetByCriteria(x => x.FechaBaja == null);
+                foreach (var producto in productos)
+                {
+                    Publicacion publicacion = new Publicacion();
+                    publicacion.IdProducto = producto.IdProducto;
+                    publicacion.IdSucursal = sucursalBase.IdSucursal;
+                    publicacion.Stock = 0;
+                    publicacion.FechaDesde = DateTime.Now;
+                    publicacion.FechaActualizacion = DateTime.Now;
+                    await _unitOfWork.GenericRepository<Publicacion>().Insert(publicacion);
+                }
             }
             catch (ApiException)
             {
