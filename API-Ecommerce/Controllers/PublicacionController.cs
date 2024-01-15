@@ -161,7 +161,6 @@ namespace API_Ecommerce.Controllers
                 string user = UserEmailFromJWT();
 
 
-
                 IList<PublicacionDTO> publicaciones = await _service.GetPublicacionesRolSucursal(user);
                 return new ApiResponse(new { data = publicaciones });
 

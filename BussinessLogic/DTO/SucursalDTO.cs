@@ -5,7 +5,7 @@ namespace BussinessLogic.DTO
 {
     public class SucursalDTO
     {
-
+        public static int IdsucursalGenerica = 1;
         public int IdSucursal { get; set; }
         public string EmailSucursal { get; set; }
         public DateTime FechaAlta { get; set; }
