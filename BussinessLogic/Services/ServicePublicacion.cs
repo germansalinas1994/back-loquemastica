@@ -149,7 +149,7 @@ namespace BussinessLogic.Services
                                       .ThenInclude(producto => producto.IdCategoriaNavigation)
                     );
 
-                return publicaciones.Adapt<IList<PublicacionDTO>>();
+                return publicaciones.Adapt<IList<PublicacionDTO>>().OrderBy(p => p.Stock).ToList();
 
             }
             catch (ApiException)
