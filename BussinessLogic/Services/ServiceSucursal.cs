@@ -179,7 +179,7 @@ namespace BussinessLogic.Services
                     Publicacion publicacion = new Publicacion();
                     publicacion.IdProducto = producto.IdProducto;
                     publicacion.IdSucursal = sucursalBase.IdSucursal;
-                    publicacion.Stock = 0;
+                    publicacion.Stock = (sucursalBase.IdSucursal == 1) ? 1 : 0; // Asigna 1 solo si es la sucursal con Id 1
                     publicacion.FechaDesde = DateTime.Now;
                     publicacion.FechaActualizacion = DateTime.Now;
                     await _unitOfWork.GenericRepository<Publicacion>().Insert(publicacion);

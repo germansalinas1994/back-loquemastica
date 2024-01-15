@@ -124,7 +124,8 @@ namespace BussinessLogic.Services
                     Publicacion publicacion = new Publicacion();
                     publicacion.IdProducto = productoCargado.IdProducto;
                     publicacion.IdSucursal = sucursal.IdSucursal;
-                    publicacion.Stock = 0;
+                    // Asigna 1 solo si es la sucursal con Id 1
+                    publicacion.Stock = (sucursal.IdSucursal == 1) ? 1 : 0;
                     publicacion.FechaDesde = DateTime.Now;
                     publicacion.FechaActualizacion = DateTime.Now;
 
