@@ -16,11 +16,15 @@ namespace BussinessLogic.Services
     {
         //Instancio el UnitOfWork que vamos a usar
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ServiceReporte _serviceReporte;
+
 
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceSucursal(IUnitOfWork unitOfWork)
+        public ServiceSucursal(IUnitOfWork unitOfWork , ServiceReporte ServiceReporte)
         {
             _unitOfWork = unitOfWork;
+            _serviceReporte = ServiceReporte;
+
         }
 
 
@@ -329,6 +333,28 @@ namespace BussinessLogic.Services
                 throw new ApiException(e);
             }
 
+
+        }
+
+        public async Task<List<PedidoSucursalDTO>> GenerarReportePedidosSucursal(int mes, int anio, int estado, string user)
+        {
+
+            try
+            {
+                List<PedidoSucursalDTO> pedidosDTO = await FiltrarPedidosSucursal(mes, anio, estado, user);
+                
+                //genero el reporte
+                await _serviceReporte.GenerarReportePedidosSucursal(pedidosDTO, mes, anio, estado, user);
+                return pedidosDTO;
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
 
         }
     }
