@@ -345,7 +345,6 @@ namespace BussinessLogic.Services
                 
                 //genero el reporte
                 await _serviceReporte.GenerarReportePedidosSucursal(pedidosDTO, mes, anio, estado, user);
-                return pedidosDTO;
             }
             catch (ApiException)
             {

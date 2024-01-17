@@ -316,7 +316,7 @@ namespace BussinessLogic.Services
 
                                 foreach (PedidoDTO item in pedidos)
                                 {
-                                    totalPedidos += item.Total;
+                                    totalPedido += total;
 
                                     tabla.Cell().BorderBottom(0.5f).BorderColor("#D9D9D9")
                                     .Padding(2).Text(item.Publicacion.IdProductoNavigation.Nombre).FontSize(10);
@@ -333,7 +333,7 @@ namespace BussinessLogic.Services
 
                             });
 
-                            col1.Item().Background(Colors.Grey.Lighten3).AlignRight().Text("Total: $" + totalPedidos).FontSize(12);
+                            col1.Item().Background(Colors.Grey.Lighten3).AlignRight().Text("Total: $" + totalPedido).FontSize(12);
 
 
                             col1.Spacing(10);
