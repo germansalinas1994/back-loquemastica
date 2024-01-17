@@ -201,6 +201,28 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("/generarReportePedidosSucursal")]
+        [Autorize(Policy = "Sucursal")]
+
+        public async Task<ApiResponse> GenerarReportePedidosSucursal([FromBody] SearchPedidoSucursalDTO search)
+        {
+            try
+            {
+                string user = UserEmailFromJWT();
+                string path = await _serviceSucursal.GenerarReportePedidosSucursal(search.mes, search.anio, search.estado, user);
+                return new ApiResponse(new { path = path }, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
 
 
 
