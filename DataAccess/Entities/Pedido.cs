@@ -9,7 +9,7 @@ public partial class Pedido
 
     public int? IdUsuario { get; set; }
     public int? IdSucursalPedido { get; set; }
-    public DateTime? FechaAlta { get; set; }
+    public DateTime FechaAlta { get; set; }
 
     public DateTime? FechaBaja { get; set; }
 

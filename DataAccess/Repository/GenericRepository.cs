@@ -189,7 +189,7 @@ namespace DataAccess.Repository
         }
 
 
-        public IQueryable<T> Search()
+        public async Task<IQueryable<T>> Search()
         {
             return _context.Set<T>().AsQueryable();
         }

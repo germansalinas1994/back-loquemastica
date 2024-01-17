@@ -5,6 +5,12 @@ namespace BussinessLogic.DTO
 {
     public class EnvioDTO
     {
+        public static int EstadoEnvioTodos = 0;
+        public static int EstadoEnvioEnPreparacion = 1;
+        public static int EstadoEnvioEnviado = 2;
+        public static int EstadoEnvioEntregado = 3;
+        public static int EstadoEnvioSinEnvio = 4;
+
         public int Id { get; set; }
 
         public virtual DomicilioDTO Domicilio { get; set; }

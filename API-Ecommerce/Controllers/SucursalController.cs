@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using AutoWrapper.Wrappers;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -179,6 +180,27 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("/filtrarPedidosSucursal")]
+        [Authorize(Policy = "Sucursal")]
+        public async Task<ApiResponse> FiltrarPedidosSucursal([FromBody] SearchPedidoSucursalDTO search)
+        {
+            try
+            {
+                string user = UserEmailFromJWT();
+                List<PedidoSucursalDTO> pedidos = await _serviceSucursal.FiltrarPedidosSucursal(search.mes, search.anio, search.estado, user);
+                return new ApiResponse(pedidos, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
 
 
 
@@ -189,6 +211,14 @@ namespace API_Ecommerce.Controllers
         public int IdPedido { get; set; }
         public int IdEstadoEnvio { get; set; }
     }
+
+    public class SearchPedidoSucursalDTO
+    {
+        public int mes { get; set; }
+        public int anio { get; set; }
+        public int estado { get; set; }
+    }
+
 }
 
 
