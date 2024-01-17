@@ -17,11 +17,13 @@ namespace BussinessLogic.Services
 
         private readonly ServiceGoogleCloud _serviceGoogleCloud;
 
+        private readonly ServiceReporte _serviceReporte;
+
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
         public ServiceProducto(IUnitOfWork unitOfWork, ServiceGoogleCloud serviceGoogleCloud)
         {
             _unitOfWork = unitOfWork;
-            _serviceSucursal = new ServiceSucursal(_unitOfWork);
+            _serviceSucursal = new ServiceSucursal(_unitOfWork, _serviceReporte);
             _serviceGoogleCloud = serviceGoogleCloud;
 
         }

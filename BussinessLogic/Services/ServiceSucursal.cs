@@ -20,10 +20,10 @@ namespace BussinessLogic.Services
 
 
         //Inyecto el UnitOfWork por el constructor, esto se hace para que se cree un nuevo contexto por cada vez que se llame a la clase
-        public ServiceSucursal(IUnitOfWork unitOfWork , ServiceReporte ServiceReporte)
+        public ServiceSucursal(IUnitOfWork unitOfWork, ServiceReporte serviceReporte)
         {
             _unitOfWork = unitOfWork;
-            _serviceReporte = ServiceReporte;
+            _serviceReporte = serviceReporte;
 
         }
 
@@ -336,15 +336,16 @@ namespace BussinessLogic.Services
 
         }
 
-        public async Task<List<PedidoSucursalDTO>> GenerarReportePedidosSucursal(int mes, int anio, int estado, string user)
+        public async Task<byte[]> GenerarReportePedidosSucursal(int mes, int anio, string user)
         {
-
             try
             {
-                List<PedidoSucursalDTO> pedidosDTO = await FiltrarPedidosSucursal(mes, anio, estado, user);
-                
-                //genero el reporte
-                await _serviceReporte.GenerarReportePedidosSucursal(pedidosDTO, mes, anio, estado, user);
+                DatosReporteDTO datosReporte = await GetPedidosMensuales(mes, anio, user);
+
+                byte[] reporte = await _serviceReporte.GenerarReportePedidosSucursal(datosReporte);
+
+                return reporte;
+
             }
             catch (ApiException)
             {
@@ -356,5 +357,70 @@ namespace BussinessLogic.Services
             }
 
         }
+
+
+        public async Task<DatosReporteDTO> GetPedidosMensuales(int mes, int anio, string user)
+        {
+
+            try
+            {
+
+                DatosReporteDTO datosReporte = new DatosReporteDTO();
+
+                datosReporte.MesReporte = mes;
+                datosReporte.AnioReporte = anio;
+            
+                List<PedidosReporteDTO> pedidosDTO = new List<PedidosReporteDTO>();
+
+
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
+                if (sucursal == null)
+                {
+                    throw new ApiException("No se encontró la sucursal");
+                }
+
+                datosReporte.NombreSucursal = sucursal.Nombre;
+                datosReporte.DireccionSucursal = sucursal.Direccion;
+
+                var query = (await _unitOfWork.GenericRepository<Pedido>().Search()).Where(x => x.IdSucursalPedido == sucursal.IdSucursal && x.FechaAlta.Month == mes && x.FechaAlta.Year == anio);
+                //hago la consulta, con el search que arme 
+                List<Pedido> pedidos = await query.Include(p => p.PublicacionPedido)
+                                                       .ThenInclude(pu => pu.Publicacion)
+                                                       .ThenInclude(pr => pr.IdProductoNavigation)
+                                                       .Include(e => e.Envio)
+                                                       .ThenInclude(ee => ee.EstadoEnvio)
+                                                       .Include(u => u.Usuario)
+                                                       .ToListAsync();
+                if (pedidos != null && pedidos.Count > 0)
+                {
+                    pedidosDTO = pedidos.Select(p => new PedidosReporteDTO
+                    {
+                        FechaPedido = p.FechaAlta,
+                        Orden_MercadoPago = p.Orden_MercadoPago,
+                        EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
+                        EmailUsuario = p.Usuario.Email,
+                        Total = p.Total,
+
+                    }).ToList();
+                }
+                
+                datosReporte.Pedidos = pedidosDTO.OrderByDescending(p => p.FechaPedido).ToList();
+
+                return datosReporte;
+
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
+
+        }
+
     }
 }

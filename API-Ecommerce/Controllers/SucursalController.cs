@@ -203,15 +203,30 @@ namespace API_Ecommerce.Controllers
 
         [HttpPost]
         [Route("/generarReportePedidosSucursal")]
-        [Autorize(Policy = "Sucursal")]
+        [Authorize(Policy = "Sucursal")]
 
         public async Task<ApiResponse> GenerarReportePedidosSucursal([FromBody] SearchPedidoSucursalDTO search)
         {
             try
             {
                 string user = UserEmailFromJWT();
-                string path = await _serviceSucursal.GenerarReportePedidosSucursal(search.mes, search.anio, search.estado, user);
-                return new ApiResponse(new { path = path }, (int)HttpStatusCode.OK);
+
+                byte[] pdfBytes = await _serviceSucursal.GenerarReportePedidosSucursal(search.mes, search.anio, user);
+
+                if (pdfBytes == null)
+                {
+                    throw new ApiException("No se pudo generar el reporte", (int)HttpStatusCode.BadRequest, "ERRORREPORTE");
+                }
+
+                // Convertir el PDF a Base64
+                string pdfBase64 = Convert.ToBase64String(pdfBytes);
+
+                //necesito que el nombre del archivo sea con la fecha y hora que llega por parametro
+
+                string nombreArchivo = $"ReportePedidos_{search.mes.ToString("D2")}_{search.anio}.pdf";
+
+                // Devolver la cadena Base64 como parte de la respuesta
+                return new ApiResponse(new { pdf = pdfBase64, nombre = nombreArchivo }, (int)HttpStatusCode.OK);
             }
             catch (ApiException)
             {
