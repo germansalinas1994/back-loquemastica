@@ -251,7 +251,7 @@ namespace BussinessLogic.Services
 
                                 col.Item().Height(39).Border(1)
                                 .BorderColor("#1f0f0f").AlignCenter()
-                                .Text("Fecha " + datosReporte.FechaReporte.ToString("MM/yyyy"));
+                                .Text(datosReporte.FechaReporte.ToString("MM/yyyy"));
 
 
                             });
@@ -273,7 +273,7 @@ namespace BussinessLogic.Services
                             col1.Item().Column(
                                 col2 =>
                                 {
-                                    col2.Item().AlignCenter().Text("Pedidos del mes de " + nombreMes).Bold().FontSize(15);
+                                    col2.Item().AlignCenter().Text("Pedidos del mes de " + nombreMes + " del " + datosReporte.AnioReporte).Bold().FontSize(15);
 
                                 });
 
