@@ -164,7 +164,7 @@ namespace BussinessLogic.Services
                 Sucursal sucursalExistente = _unitOfWork.GenericRepository<Sucursal>().GetAll().Result.Where(s => s.EmailSucursal == sucursal.EmailSucursal).FirstOrDefault();
                 if (sucursalExistente != null)
                 {
-                    throw new Exception("El mail de la sucursal ya existe");
+                    throw new ApiException("El mail de la sucursal ya existe");
                 }
 
                 await _unitOfWork.BeginTransactionAsync();
