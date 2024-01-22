@@ -33,7 +33,7 @@ namespace BussinessLogic.Services
         {
             try
             {
-                IList<Sucursal> sucursales = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.FechaBaja == null)).OrderByDescending(x => x.FechaAlta).ToList();
+                IList<Sucursal> sucursales = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.FechaBaja == null)).OrderBy(x => x.IdSucursal).ToList();
                 return sucursales.Adapt<List<SucursalDTO>>();
             }
             catch (Exception e)
@@ -270,57 +270,7 @@ namespace BussinessLogic.Services
                     throw new ApiException("No se encontró la sucursal");
                 }
 
-                //creo el objeto que voy a devolver
-                List<PedidoSucursalDTO> pedidosDTO = new List<PedidoSucursalDTO>();
-
-                //si el estado es 0, es porque no se selecciono ningun estado, entonces traigo todos los pedidos de la sucursal y solo filtro por mes y año
-                //si el estado es 4 es por que es sin envio, entonces deberia traer todos los pedidos que no tengan envio
-                // Inicializa la consulta base
-                var query = (await _unitOfWork.GenericRepository<Pedido>().Search()).Where(x => x.IdSucursalPedido == sucursal.IdSucursal && x.FechaAlta.Month == mes && x.FechaAlta.Year == anio);
-                if (estado != EnvioDTO.EstadoEnvioTodos)
-                {
-                    if (estado == EnvioDTO.EstadoEnvioSinEnvio)
-                    {
-                        query = query.Where(x => x.Envio == null);
-                    }
-                    else
-                    {
-                        query = query.Where(x => x.Envio.IdEstadoEnvio == estado);
-                    }
-                }
-
-                //hago la consulta, con el search que arme 
-                List<Pedido> pedidos = await query.Include(p => p.PublicacionPedido)
-                                                       .ThenInclude(pu => pu.Publicacion)
-                                                       .ThenInclude(pr => pr.IdProductoNavigation)
-                                                       .Include(e => e.Envio)
-                                                       .ThenInclude(ee => ee.EstadoEnvio)
-                                                       .Include(u => u.Usuario)
-                                                       .ToListAsync();
-                if (pedidos != null && pedidos.Count > 0)
-                {
-                    pedidosDTO = pedidos.Select(p => new PedidoSucursalDTO
-                    {
-                        Id = p.Id,
-                        Fecha = p.FechaAlta,
-                        Orden_MercadoPago = p.Orden_MercadoPago,
-                        EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
-                        EmailUsuario = p.Usuario.Email,
-                        idEstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.IdEstadoEnvio : null,
-                        Total = p.Total,
-                        DetallePedido = p.PublicacionPedido.Select(pp => new DetallePedidoDTO
-                        {
-                            // Aquí mapea los campos del detalle del pedido según tus necesidades
-                            Id = pp.IdPublicacion,
-                            Cantidad = pp.Cantidad,
-                            Precio = pp.Precio,
-                            NombreProducto = pp.Publicacion.IdProductoNavigation.Nombre,
-                            SubTotal = pp.Cantidad * pp.Precio
-                            // Agrega más campos según sea necesario
-                        }).ToList()
-                    }).ToList();
-                }
-                return pedidosDTO.OrderByDescending(p => p.Fecha).ToList();
+                return await GetPedidosSucursal(mes, anio, estado, sucursal.IdSucursal);
 
 
             }
@@ -369,8 +319,7 @@ namespace BussinessLogic.Services
 
                 datosReporte.MesReporte = mes;
                 datosReporte.AnioReporte = anio;
-            
-                List<PedidosReporteDTO> pedidosDTO = new List<PedidosReporteDTO>();
+
 
 
                 Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == user)).FirstOrDefault();
@@ -382,32 +331,8 @@ namespace BussinessLogic.Services
                 datosReporte.NombreSucursal = sucursal.Nombre;
                 datosReporte.DireccionSucursal = sucursal.Direccion;
 
-                var query = (await _unitOfWork.GenericRepository<Pedido>().Search()).Where(x => x.IdSucursalPedido == sucursal.IdSucursal && x.FechaAlta.Month == mes && x.FechaAlta.Year == anio);
-                //hago la consulta, con el search que arme 
-                List<Pedido> pedidos = await query.Include(p => p.PublicacionPedido)
-                                                       .ThenInclude(pu => pu.Publicacion)
-                                                       .ThenInclude(pr => pr.IdProductoNavigation)
-                                                       .Include(e => e.Envio)
-                                                       .ThenInclude(ee => ee.EstadoEnvio)
-                                                       .Include(u => u.Usuario)
-                                                       .ToListAsync();
-                if (pedidos != null && pedidos.Count > 0)
-                {
-                    pedidosDTO = pedidos.Select(p => new PedidosReporteDTO
-                    {
-                        FechaPedido = p.FechaAlta,
-                        Orden_MercadoPago = p.Orden_MercadoPago,
-                        EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
-                        EmailUsuario = p.Usuario.Email,
-                        Total = p.Total,
 
-                    }).ToList();
-                }
-                
-                datosReporte.Pedidos = pedidosDTO.OrderByDescending(p => p.FechaPedido).ToList();
-
-                return datosReporte;
-
+                return await GetDatosReporte(mes, anio, datosReporte, sucursal.IdSucursal);
 
             }
             catch (ApiException)
@@ -422,5 +347,174 @@ namespace BussinessLogic.Services
 
         }
 
+        private async Task<DatosReporteDTO> GetDatosReporte(int mes, int anio, DatosReporteDTO datosReporte, int idSucursal)
+        {
+            List<PedidosReporteDTO> pedidosDTO = new List<PedidosReporteDTO>();
+
+            var query = (await _unitOfWork.GenericRepository<Pedido>().Search()).Where(x => x.IdSucursalPedido == idSucursal && x.FechaAlta.Month == mes && x.FechaAlta.Year == anio);
+            //hago la consulta, con el search que arme 
+            List<Pedido> pedidos = await query.Include(p => p.PublicacionPedido)
+                                                   .ThenInclude(pu => pu.Publicacion)
+                                                   .ThenInclude(pr => pr.IdProductoNavigation)
+                                                   .Include(e => e.Envio)
+                                                   .ThenInclude(ee => ee.EstadoEnvio)
+                                                   .Include(u => u.Usuario)
+                                                   .ToListAsync();
+            if (pedidos != null && pedidos.Count > 0)
+            {
+                pedidosDTO = pedidos.Select(p => new PedidosReporteDTO
+                {
+                    FechaPedido = p.FechaAlta,
+                    Orden_MercadoPago = p.Orden_MercadoPago,
+                    EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
+                    EmailUsuario = p.Usuario.Email,
+                    Total = p.Total,
+
+                }).ToList();
+            }
+
+            datosReporte.Pedidos = pedidosDTO.OrderByDescending(p => p.FechaPedido).ToList();
+
+            return datosReporte;
+        }
+
+        public async Task<List<PedidoSucursalDTO>> FiltrarPedidosAdministrador(int mes, int anio, int sucursalSeleccionada, int estado)
+        {
+            try
+            {
+                //primero obtengo la sucursal del usuario
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetById(sucursalSeleccionada));
+                if (sucursal == null)
+                {
+                    throw new ApiException("No se encontró la sucursal");
+                }
+
+                return await GetPedidosSucursal(mes, anio, estado, sucursal.IdSucursal);
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
+        }
+
+        private async Task<List<PedidoSucursalDTO>> GetPedidosSucursal(int mes, int anio, int estado, int idSucursal)
+        {
+            //creo el objeto que voy a devolver
+            List<PedidoSucursalDTO> pedidosDTO = new List<PedidoSucursalDTO>();
+
+            //si el estado es 0, es porque no se selecciono ningun estado, entonces traigo todos los pedidos de la sucursal y solo filtro por mes y año
+            //si el estado es 4 es por que es sin envio, entonces deberia traer todos los pedidos que no tengan envio
+            // Inicializa la consulta base
+            var query = (await _unitOfWork.GenericRepository<Pedido>().Search()).Where(x => x.IdSucursalPedido == idSucursal && x.FechaAlta.Month == mes && x.FechaAlta.Year == anio);
+            if (estado != EnvioDTO.EstadoEnvioTodos)
+            {
+                if (estado == EnvioDTO.EstadoEnvioSinEnvio)
+                {
+                    query = query.Where(x => x.Envio == null);
+                }
+                else
+                {
+                    query = query.Where(x => x.Envio.IdEstadoEnvio == estado);
+                }
+            }
+
+            //hago la consulta, con el search que arme 
+            List<Pedido> pedidos = await query.Include(p => p.PublicacionPedido)
+                                                   .ThenInclude(pu => pu.Publicacion)
+                                                   .ThenInclude(pr => pr.IdProductoNavigation)
+                                                   .Include(e => e.Envio)
+                                                   .ThenInclude(ee => ee.EstadoEnvio)
+                                                   .Include(u => u.Usuario)
+                                                   .ToListAsync();
+            if (pedidos != null && pedidos.Count > 0)
+            {
+                pedidosDTO = pedidos.Select(p => new PedidoSucursalDTO
+                {
+                    Id = p.Id,
+                    Fecha = p.FechaAlta,
+                    Orden_MercadoPago = p.Orden_MercadoPago,
+                    EstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.Descripcion : "Retira en la Sucursal",
+                    EmailUsuario = p.Usuario.Email,
+                    idEstadoEnvio = p.Envio != null ? p.Envio.EstadoEnvio.IdEstadoEnvio : null,
+                    Total = p.Total,
+                    DetallePedido = p.PublicacionPedido.Select(pp => new DetallePedidoDTO
+                    {
+                        // Aquí mapea los campos del detalle del pedido según tus necesidades
+                        Id = pp.IdPublicacion,
+                        Cantidad = pp.Cantidad,
+                        Precio = pp.Precio,
+                        NombreProducto = pp.Publicacion.IdProductoNavigation.Nombre,
+                        SubTotal = pp.Cantidad * pp.Precio
+                        // Agrega más campos según sea necesario
+                    }).ToList()
+                }).ToList();
+            }
+            return pedidosDTO.OrderByDescending(p => p.Fecha).ToList();
+        }
+
+        public async Task<byte[]> GenerarReportePedidosAdministrador(int mes, int anio, int sucursalSeleccionada)
+        {
+            try
+            {
+                DatosReporteDTO datosReporte = await GetPedidosMensualesAdministrador(mes, anio, sucursalSeleccionada);
+
+                byte[] reporte = await _serviceReporte.GenerarReportePedidosSucursal(datosReporte);
+
+                return reporte;
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
+        }
+        public async Task<DatosReporteDTO> GetPedidosMensualesAdministrador(int mes, int anio, int idSucursal)
+        {
+
+            try
+            {
+
+                DatosReporteDTO datosReporte = new DatosReporteDTO();
+
+                datosReporte.MesReporte = mes;
+                datosReporte.AnioReporte = anio;
+
+
+
+                Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(idSucursal);
+                if (sucursal == null)
+                {
+                    throw new ApiException("No se encontró la sucursal");
+                }
+
+                datosReporte.NombreSucursal = sucursal.Nombre;
+                datosReporte.DireccionSucursal = sucursal.Direccion;
+
+
+                return await GetDatosReporte(mes, anio, datosReporte, sucursal.IdSucursal);
+
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+
+
+        }
     }
 }

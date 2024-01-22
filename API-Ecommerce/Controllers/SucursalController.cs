@@ -238,6 +238,64 @@ namespace API_Ecommerce.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("/filtrarPedidosAdministrador")]
+        [Authorize(Policy = "Admin")]
+
+        public async Task<ApiResponse> FiltrarPedidosAdministrador([FromBody] SearchPedidoAdministradorDTO search)
+        {
+            try
+            {
+                List<PedidoSucursalDTO> pedidos = await _serviceSucursal.FiltrarPedidosAdministrador(search.mes, search.anio, search.sucursalSeleccionada, search.estado);
+                return new ApiResponse(pedidos, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
+        [HttpPost]
+        [Route("/generarReportePedidosAdministrador")]
+        [Authorize(Policy = "Admin")]
+
+        public async Task<ApiResponse> GenerarReportePedidosAdministrador([FromBody] SearchPedidoAdministradorDTO search)
+        {
+            try
+            {
+                byte[] pdfBytes = await _serviceSucursal.GenerarReportePedidosAdministrador(search.mes, search.anio, search.sucursalSeleccionada);
+
+                if (pdfBytes == null)
+                {
+                    throw new ApiException("No se pudo generar el reporte", (int)HttpStatusCode.BadRequest, "ERRORREPORTE");
+                }
+
+                // Convertir el PDF a Base64
+                string pdfBase64 = Convert.ToBase64String(pdfBytes);
+
+                //necesito que el nombre del archivo sea con la fecha y hora que llega por parametro
+
+                string nombreArchivo = $"ReportePedidos_{search.mes.ToString("D2")}_{search.anio}.pdf";
+
+                // Devolver la cadena Base64 como parte de la respuesta
+                return new ApiResponse(new { pdf = pdfBase64, nombre = nombreArchivo }, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
+
+
 
 
 
@@ -253,6 +311,14 @@ namespace API_Ecommerce.Controllers
     {
         public int mes { get; set; }
         public int anio { get; set; }
+        public int estado { get; set; }
+    }
+
+    public class SearchPedidoAdministradorDTO
+    {
+        public int mes { get; set; }
+        public int anio { get; set; }
+        public int sucursalSeleccionada { get; set; }
         public int estado { get; set; }
     }
 
