@@ -83,7 +83,7 @@ namespace BussinessLogic.Services
             {
                 // Inicializa la consulta base
                 var search = (await _unitOfWork.GenericRepository<Publicacion>().Search())
-                                          .Where(x => x.IdSucursal == sucursal && x.Stock > 0);
+                                          .Where(x => x.IdSucursal == sucursal && x.Stock > 0 && x.FechaHasta == null);
 
                 // Agrega condiciones de filtrado si es necesario
                 if (categoria != null)

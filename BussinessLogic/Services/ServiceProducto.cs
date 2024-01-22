@@ -54,13 +54,24 @@ namespace BussinessLogic.Services
         {
             try
             {
-                Producto producto = await _unitOfWork.GenericRepository<Producto>().GetById(id);
+                await _unitOfWork.BeginTransactionAsync();
+                Producto producto = (await _unitOfWork.GenericRepository<Producto>().GetByCriteriaIncludingSpecificRelations(x => x.IdProducto == id, query => query.Include(x => x.Publicacion))).FirstOrDefault();
 
                 if (producto != null)
                 {
                     producto.FechaBaja = DateTime.Now;
                     producto.FechaModificacion = DateTime.Now;
                     Producto productoActualizado = await _unitOfWork.GenericRepository<Producto>().Update(producto);
+
+                    foreach (var publicacion in productoActualizado.Publicacion)
+                    {
+                        publicacion.FechaHasta = DateTime.Now;
+                        publicacion.FechaActualizacion = DateTime.Now;
+                        publicacion.Stock = 0;
+                        await _unitOfWork.GenericRepository<Publicacion>().Update(publicacion);
+                    }
+
+                    await _unitOfWork.CommitAsync();
                 }
                 else
                 {
@@ -70,10 +81,12 @@ namespace BussinessLogic.Services
             }
             catch (ApiException)
             {
+                await _unitOfWork.RollbackAsync();
                 throw;
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackAsync();
                 throw new ApiException(ex);
             }
 
