@@ -134,6 +134,41 @@ namespace BussinessLogic.Services
             }
         }
 
+public async Task<int> GetCantidadPedidosPorSucursal(int id, int mes, int anio)
+{
+    try
+    {
+        Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
+
+        if (sucursal == null)
+        {
+            throw new Exception($"The sucursal with ID {id} does not exist");
+        }
+
+        int cantidadPedidos = (await _unitOfWork.GenericRepository<Pedido>()
+            .GetByCriteriaIncludingSpecificRelations(
+                x => x.IdSucursalPedido == sucursal.IdSucursal &&
+                     x.FechaAlta.Month == mes &&
+                     x.FechaAlta.Year == anio,
+                query => query.Include(p => p.PublicacionPedido)
+                    .ThenInclude(pu => pu.Publicacion)
+                    .ThenInclude(pr => pr.IdProductoNavigation)
+                    .Include(e => e.Envio)
+                    .ThenInclude(ee => ee.EstadoEnvio)
+                    .Include(u => u.Usuario)))
+            .Count();
+
+        return cantidadPedidos;
+    }
+    catch (Exception e)
+    {
+        // Log or provide more detailed error handling here
+        throw new Exception("An error occurred while retrieving order count", e);
+    }
+}
+
+
+
         public async Task<SucursalDTO> GetSucursalById(int id)
         {
 
@@ -155,6 +190,27 @@ namespace BussinessLogic.Services
                 throw new ApiException(ex);
             }
         }
+
+        // Inside ServiceSucursal
+public async Task<int> GetCantidadPedidosPorSucursal(int sucursalId)
+{
+    try
+    {
+        // Get current month and year
+        DateTime currentDate = DateTime.Now;
+        int currentMonth = currentDate.Month;
+        int currentYear = currentDate.Year;
+        int cantidadPedidos = await GetCantidadPedidosPorSucursal(sucursalId, currentMonth, currentYear);
+        // Call your existing method to get the quantity of orders for the specified sucursal in the current month
+        return cantidadPedidos;
+    }
+    catch (Exception ex)
+    {
+        // Log or handle the exception as needed
+        throw new Exception("An error occurred while retrieving order count", ex);
+    }
+}
+
 
         public async Task CargarSucursal(SucursalDTO sucursal)
         {
