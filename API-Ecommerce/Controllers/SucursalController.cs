@@ -141,30 +141,34 @@ namespace API_Ecommerce.Controllers
         [HttpGet]
         [Route("/cantidadPedidosPorSucursal")]
         [Authorize(Policy = "Admin")]
-public async Task<IActionResult> GetCantidadPedidosPorSucursal()
-{
-    try
-    {
-         // Get the list of all sucursals from the database (you need to have a method for this in your service/repository)
-        List<SucursalDTO> sucursals = await _serviceSucursal.GetSucursales();
-
-        // Dictionary to store the results (sucursalName -> cantidadPedidos)
-        Dictionary<string, int> result = new Dictionary<string, int>();
-
-        foreach (var sucursal in sucursals)
+        public async Task<IActionResult> GetCantidadPedidosPorSucursal()
         {
-            int cantidadPedidos = await _serviceSucursal.GetCantidadPedidosPorSucursal(sucursal.IdSucursal);
-            result.Add(sucursal.Nombre, cantidadPedidos);
-        }
+            try
+            {
+                // Get the list of all sucursals from the database (you need to have a method for this in your service/repository)
+                List<SucursalDTO> sucursals = await _serviceSucursal.GetSucursales();
 
-        return Ok(result);
-    }
-    catch (Exception e)
-    {
-        // Log or provide more detailed error handling here
-        return StatusCode(500, "An error occurred while retrieving order count");
-    }
-}
+                if(sucursals.Any()){
+                    sucursals.RemoveAt(0);
+                }
+
+                // Dictionary to store the results (sucursalName -> cantidadPedidos)
+                Dictionary<string, int> result = new Dictionary<string, int>();
+
+                foreach (var sucursal in sucursals)
+                {
+                    int cantidadPedidos = await _serviceSucursal.GetCantidadPedidosPorSucursal(sucursal.IdSucursal);
+                    result.Add(sucursal.Nombre, cantidadPedidos);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                // Log or provide more detailed error handling here
+                return StatusCode(500, "An error occurred while retrieving order count");
+            }
+        }
 
 
 
@@ -218,7 +222,7 @@ public async Task<IActionResult> GetCantidadPedidosPorSucursal()
         public async Task<ApiResponse> FiltrarPedidosSucursal([FromBody] SearchPedidoSucursalDTO search)
         {
             try
-            { 
+            {
                 string user = UserEmailFromJWT();
                 List<PedidoSucursalDTO> pedidos = await _serviceSucursal.FiltrarPedidosSucursal(search.mes, search.anio, search.estado, user);
                 return new ApiResponse(pedidos, (int)HttpStatusCode.OK);
