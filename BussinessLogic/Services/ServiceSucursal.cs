@@ -261,6 +261,7 @@ namespace BussinessLogic.Services
         {
             try
             {
+        
                 Sucursal sucursalExistente = await _unitOfWork.GenericRepository<Sucursal>().GetById(sucursal.IdSucursal);
                 if (sucursalExistente == null)
                 {
@@ -278,6 +279,11 @@ namespace BussinessLogic.Services
             }
             catch (Exception e)
             {
+
+                if(e.InnerException.Message.Contains("sucursal.EmailSucursal_UNIQUE")){
+                    throw new ApiException("El mail de la sucursal ya existe");
+                }
+                
                 throw new ApiException(e);
             }
         }
