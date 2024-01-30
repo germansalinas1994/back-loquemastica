@@ -9,6 +9,7 @@ using BussinessLogic.DTO.Search;
 using MercadoPago.Resource.User;
 using AutoWrapper.Wrappers;
 using System.Net;
+using System.Globalization;
 
 namespace BussinessLogic.Services
 {
@@ -134,38 +135,35 @@ namespace BussinessLogic.Services
             }
         }
 
-public async Task<int> GetCantidadPedidosPorSucursal(int id, int mes, int anio)
-{
-    try
-    {
-        Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
-
-        if (sucursal == null)
+        public async Task<int> GetCantidadPedidosPorSucursal(int id, int mes, int anio)
         {
-            throw new Exception($"The sucursal with ID {id} does not exist");
+            try
+            {
+                Sucursal sucursal = await _unitOfWork.GenericRepository<Sucursal>().GetById(id);
+
+                if (sucursal == null)
+                {
+                    throw new Exception($"The sucursal with ID {id} does not exist");
+                }
+
+                int cantidadPedidos = (await _unitOfWork.GenericRepository<Pedido>()
+                    .GetByCriteriaIncludingSpecificRelations(
+                        x => x.IdSucursalPedido == sucursal.IdSucursal &&
+                             x.FechaAlta.Month == mes &&
+                             x.FechaAlta.Year == anio))
+                    .Count();
+
+                return cantidadPedidos;
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
-
-        int cantidadPedidos = (await _unitOfWork.GenericRepository<Pedido>()
-            .GetByCriteriaIncludingSpecificRelations(
-                x => x.IdSucursalPedido == sucursal.IdSucursal &&
-                     x.FechaAlta.Month == mes &&
-                     x.FechaAlta.Year == anio,
-                query => query.Include(p => p.PublicacionPedido)
-                    .ThenInclude(pu => pu.Publicacion)
-                    .ThenInclude(pr => pr.IdProductoNavigation)
-                    .Include(e => e.Envio)
-                    .ThenInclude(ee => ee.EstadoEnvio)
-                    .Include(u => u.Usuario)))
-            .Count();
-
-        return cantidadPedidos;
-    }
-    catch (Exception e)
-    {
-        // Log or provide more detailed error handling here
-        throw new Exception("An error occurred while retrieving order count", e);
-    }
-}
 
 
 
@@ -192,24 +190,24 @@ public async Task<int> GetCantidadPedidosPorSucursal(int id, int mes, int anio)
         }
 
         // Inside ServiceSucursal
-public async Task<int> GetCantidadPedidosPorSucursal(int sucursalId)
-{
-    try
-    {
-        // Get current month and year
-        DateTime currentDate = DateTime.Now;
-        int currentMonth = currentDate.Month;
-        int currentYear = currentDate.Year;
-        int cantidadPedidos = await GetCantidadPedidosPorSucursal(sucursalId, currentMonth, currentYear);
-        // Call your existing method to get the quantity of orders for the specified sucursal in the current month
-        return cantidadPedidos;
-    }
-    catch (Exception ex)
-    {
-        // Log or handle the exception as needed
-        throw new Exception("An error occurred while retrieving order count", ex);
-    }
-}
+        public async Task<int> GetCantidadPedidosPorSucursal(int sucursalId)
+        {
+            try
+            {
+                // Get current month and year
+                DateTime currentDate = DateTime.Now;
+                int currentMonth = currentDate.Month;
+                int currentYear = currentDate.Year;
+                int cantidadPedidos = await GetCantidadPedidosPorSucursal(sucursalId, currentMonth, currentYear);
+                // Call your existing method to get the quantity of orders for the specified sucursal in the current month
+                return cantidadPedidos;
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception as needed
+                throw new Exception("An error occurred while retrieving order count", ex);
+            }
+        }
 
 
         public async Task CargarSucursal(SucursalDTO sucursal)
@@ -572,5 +570,147 @@ public async Task<int> GetCantidadPedidosPorSucursal(int sucursalId)
 
 
         }
+
+
+
+        // public async Task<Dictionary<string, int>> GetPedidosSucursalUltimosMeses(string userEmail)
+
+        // {
+
+        //     try
+        //     {
+
+        //         var fechaInicio = DateTime.Now.AddMonths(-6);
+        //         Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == userEmail)).FirstOrDefault();
+
+        //         if (sucursal == null)
+        //         {
+        //             throw new ApiException("No se encontró la sucursal");
+        //         }
+
+        //         var pedidos = (await _unitOfWork.GenericRepository<Pedido>()
+        //                                         .GetByCriteria(p => p.IdSucursalPedido == sucursal.IdSucursal &&
+        //                                                             p.FechaAlta >= fechaInicio))
+        //                                         .ToList();
+
+        //         var pedidosPorMes = pedidos.GroupBy(p => new { p.FechaAlta.Year, p.FechaAlta.Month }).OrderByDescending(g => g.Key.Year).ThenBy(g => g.Key.Month)
+        //                                    .Select(async group => new
+        //                                    {
+        //                                        //    Mes = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(group.Key.Month),
+        //                                        Mes = await GetNombreMes(group.Key.Month),
+        //                                        Cantidad = group.Count()
+        //                                    })
+        //                                    .ToDictionary(g => g.Result.Mes, g => g.Result.Cantidad);
+
+        //         return pedidosPorMes;
+
+
+        //     }
+        //     catch (ApiException)
+        //     {
+        //         throw;
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         throw new ApiException(e);
+        //     }
+
+
+        // }
+
+        public async Task<Dictionary<string, int>> GetPedidosSucursalUltimosMeses(string userEmail)
+        {
+            try
+            {
+                var fechaInicio = DateTime.Now.AddMonths(-6);
+                Sucursal sucursal = (await _unitOfWork.GenericRepository<Sucursal>().GetByCriteria(x => x.EmailSucursal == userEmail)).FirstOrDefault();
+
+                if (sucursal == null)
+                {
+                    throw new ApiException("No se encontró la sucursal");
+                }
+
+                var pedidos = (await _unitOfWork.GenericRepository<Pedido>()
+                                                .GetByCriteria(p => p.IdSucursalPedido == sucursal.IdSucursal && p.FechaAlta >= fechaInicio))
+                                                .ToList();
+
+                //agrupo los pedidos por mes y año, creo un diccionario con la clave el mes y el valor la cantidad de pedidos, el 1 es el dia que le pongo para que no me tire error
+                var pedidosPorMes = pedidos.GroupBy(p => new { p.FechaAlta.Year, p.FechaAlta.Month })
+                                           .ToDictionary(group => new DateTime(group.Key.Year, group.Key.Month, 1), group => group.Count());
+
+                //creo una lista de los ultimos 6 meses, en formato yyyy-MM
+                var rangoMeses = Enumerable.Range(0, 6).Select(i => DateTime.Now.AddMonths(-i).ToString("yyyy-MM")).ToList();
+
+                // Para cada mes en el rango de los últimos 6 meses, se verifica si hay pedidos en ese mes. Si es así, se usa el conteo de pedidos; si no, se asigna 0. Esto asegura que todos los meses en el rango estén representados en el resultado final.
+                var resultado = rangoMeses.ToDictionary(
+                    mes => mes,
+                    mes => pedidosPorMes.ContainsKey(DateTime.ParseExact(mes + "-01", "yyyy-MM-dd", null)) ? pedidosPorMes[DateTime.ParseExact(mes + "-01", "yyyy-MM-dd", null)] : 0
+                );
+
+                // Pongo los meses con nombre
+                var resultadoFinal = new Dictionary<string, int>();
+                foreach (var item in resultado)
+                {
+                    var mesNombre = await GetNombreMes(DateTime.ParseExact(item.Key + "-01", "yyyy-MM-dd", null).Month);
+                    resultadoFinal[mesNombre] = item.Value;
+                }
+
+                return resultadoFinal;
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ApiException(e);
+            }
+        }
+
+
+        public async Task<string> GetNombreMes(int fecha)
+        {
+            try
+            {
+                //segun el numero de mes devuelvo el nombre
+                switch (fecha)
+                {
+                    case 1:
+                        return "Enero";
+                    case 2:
+                        return "Febrero";
+                    case 3:
+                        return "Marzo";
+                    case 4:
+                        return "Abril";
+                    case 5:
+                        return "Mayo";
+                    case 6:
+                        return "Junio";
+                    case 7:
+                        return "Julio";
+                    case 8:
+                        return "Agosto";
+                    case 9:
+                        return "Septiembre";
+                    case 10:
+                        return "Octubre";
+                    case 11:
+                        return "Noviembre";
+                    case 12:
+                        return "Diciembre";
+                    default:
+                        return "Error";
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
     }
 }

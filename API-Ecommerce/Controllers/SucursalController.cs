@@ -148,7 +148,8 @@ namespace API_Ecommerce.Controllers
                 // Get the list of all sucursals from the database (you need to have a method for this in your service/repository)
                 List<SucursalDTO> sucursals = await _serviceSucursal.GetSucursales();
 
-                if(sucursals.Any()){
+                if (sucursals.Any())
+                {
                     sucursals.RemoveAt(0);
                 }
 
@@ -162,6 +163,10 @@ namespace API_Ecommerce.Controllers
                 }
 
                 return Ok(result);
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -319,6 +324,28 @@ namespace API_Ecommerce.Controllers
 
                 // Devolver la cadena Base64 como parte de la respuesta
                 return new ApiResponse(new { pdf = pdfBase64, nombre = nombreArchivo }, (int)HttpStatusCode.OK);
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("/getPedidosSucursalUltimosMeses")]
+        [Authorize(Policy = "Sucursal")]
+        public async Task<ApiResponse> GetPedidosSucursalUltimosMeses()
+        {
+            try
+            {
+                string user = UserEmailFromJWT();
+                Dictionary<string, int> pedidos = await _serviceSucursal.GetPedidosSucursalUltimosMeses(user);
+                return new ApiResponse(pedidos, (int)HttpStatusCode.OK);
             }
             catch (ApiException)
             {
