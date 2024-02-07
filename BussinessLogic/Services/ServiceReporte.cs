@@ -264,7 +264,7 @@ namespace BussinessLogic.Services
                             col1.Item().Column(col2 =>
                                                 {
                                                     col2.Item().AlignLeft().Text("Lo Que Mastica Tu Mascota").FontSize(12);
-                                                    col2.Item().AlignLeft().Text(datosReporte.NombreSucursal).FontSize(10);
+                                                    // col2.Item().AlignLeft().Text(datosReporte.NombreSucursal).FontSize(10);
                                                     col2.Item().AlignLeft().Text(datosReporte.DireccionSucursal).FontSize(10);
                                                 });
 
