@@ -143,7 +143,7 @@ namespace BussinessLogic.Services
                 //esto esta bien pero, lo haria con suc.IdSucursal 
                 IList<Publicacion> publicaciones = await _unitOfWork.GenericRepository<Publicacion>()
                     .GetByCriteriaIncludingSpecificRelations(
-                        x => x.IdSucursal == sucursal.IdSucursal, // Tu criterio
+                        x => x.IdSucursal == sucursal.IdSucursal && x.FechaHasta == null,  // Tu criterio
 
                         query => query.Include(p => p.IdProductoNavigation) // Incluyes Producto
                                       .ThenInclude(producto => producto.IdCategoriaNavigation)
